@@ -1,0 +1,17 @@
+package router
+
+import (
+	"github.com/Albaihaqi354/Tickitz-BE/internal/controller"
+	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
+	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+func Init(app *gin.Engine, db *pgxpool.Pool) {
+	userRepository := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepository)
+	userController := controller.NewUserController(userService)
+
+	app.POST("/users", userController.AddUser)
+}
