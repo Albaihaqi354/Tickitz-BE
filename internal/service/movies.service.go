@@ -1,0 +1,51 @@
+package service
+
+import (
+	"context"
+	"log"
+
+	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
+	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
+)
+
+type MovieService struct {
+	movieRepository *repository.MovieRepository
+}
+
+func NewMovieService(movieRepository *repository.MovieRepository) *MovieService {
+	return &MovieService{
+		movieRepository: movieRepository,
+	}
+}
+
+func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingMovie, error) {
+	movies, err := s.movieRepository.GetUpcomingMovie(ctx)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return nil, err
+	}
+
+	var response []dto.GetUpcomingMovie
+	for _, m := range movies {
+		response = append(response, dto.GetUpcomingMovie{
+			Id:          m.Id,
+			Title:       m.Title,
+			Synopsis:    m.Synopsis,
+			Duration:    m.Duration,
+			ReleaseDate: m.ReleaseDate,
+			Director: dto.Director{
+				Id:   m.Director.Id,
+				Name: m.Director.Name,
+			},
+			PosterUrl:       m.PosterUrl,
+			BackDropUrl:     m.BackDropUrl,
+			PopularityScore: m.PopularityScore,
+			GenresName:      m.GenresName,
+			Cast:            m.Cast,
+			CreatedAt:       m.CreatedAt,
+			UpdatedAt:       m.UpdatedAt,
+		})
+	}
+
+	return response, nil
+}

@@ -13,5 +13,10 @@ func Init(app *gin.Engine, db *pgxpool.Pool) {
 	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)
 
+	movieRepository := repository.NewMoviesRepository(db)
+	movieService := service.NewMovieService(movieRepository)
+	movieController := controller.NewMovieController(movieService)
+
 	app.POST("/users", userController.AddUser)
+	app.GET("/movies/upcoming", movieController.GetUpcomingMovies)
 }
