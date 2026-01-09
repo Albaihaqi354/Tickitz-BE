@@ -57,3 +57,33 @@ func (u UserController) AddUser(c *gin.Context) {
 		Data:    []any{data},
 	})
 }
+
+func (u UserController) Login(c *gin.Context) {
+	var loginReq dto.LoginRequest
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Bad Request",
+			Success: false,
+			Error:   "invalid request body",
+			Data:    []any{},
+		})
+		return
+	}
+
+	data, err := u.userService.Login(c.Request.Context(), loginReq)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.Response{
+			Msg:     "Unauthorized",
+			Success: false,
+			Error:   err.Error(),
+			Data:    []any{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Login Success",
+		Success: true,
+		Data:    []any{data},
+	})
+}
