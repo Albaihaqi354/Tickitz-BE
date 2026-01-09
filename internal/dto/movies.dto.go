@@ -14,8 +14,6 @@ type GetUpcomingMovie struct {
 	BackDropUrl     string    `json:"backdrop_url"`
 	PopularityScore float64   `json:"popularity_score"`
 	GenresName      string    `json:"genre_name"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type Director struct {

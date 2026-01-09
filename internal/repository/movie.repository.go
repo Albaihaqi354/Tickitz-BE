@@ -25,8 +25,7 @@ func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDet
 			m.director_id, d.name AS director_name, 
 			STRING_AGG(DISTINCT a.name, ', ') AS "cast", 
 			m.poster_url, m.backdrop_url, m.popularity_score, 
-			STRING_AGG(DISTINCT g.name, ', ') AS genre_name,
-			m.created_at, m.updated_at
+			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
 		FROM movies m 
 		LEFT JOIN directors d ON m.director_id = d.id 
 		LEFT JOIN movie_casts mc ON m.id = mc.movie_id 
@@ -49,7 +48,7 @@ func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDet
 		err := rows.Scan(
 			&movie.Id, &movie.Title, &movie.Synopsis, &movie.Duration, &movie.ReleaseDate,
 			&movie.Director.Id, &movie.Director.Name, &movie.Cast, &movie.PosterUrl, &movie.BackDropUrl,
-			&movie.PopularityScore, &movie.GenresName, &movie.CreatedAt, &movie.UpdatedAt,
+			&movie.PopularityScore, &movie.GenresName,
 		)
 		if err != nil {
 			log.Println("Scan error:", err.Error())

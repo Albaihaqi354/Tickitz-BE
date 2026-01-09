@@ -12,8 +12,6 @@ type Movie struct {
 	PosterUrl       string    `db:"poster_url"`
 	BackDropUrl     string    `db:"backdrop_url"`
 	PopularityScore float64   `db:"popularity_score"`
-	CreatedAt       time.Time `db:"created_at"`
-	UpdatedAt       time.Time `db:"updated_at"`
 }
 
 type Director struct {

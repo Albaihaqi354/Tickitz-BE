@@ -37,13 +37,11 @@ func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingM
 				Id:   m.Director.Id,
 				Name: m.Director.Name,
 			},
+			Cast:            m.Cast,
 			PosterUrl:       m.PosterUrl,
 			BackDropUrl:     m.BackDropUrl,
 			PopularityScore: m.PopularityScore,
 			GenresName:      m.GenresName,
-			Cast:            m.Cast,
-			CreatedAt:       m.CreatedAt,
-			UpdatedAt:       m.UpdatedAt,
 		})
 	}
 
