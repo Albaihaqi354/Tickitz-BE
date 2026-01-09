@@ -30,18 +30,9 @@ func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingM
 		response = append(response, dto.GetUpcomingMovie{
 			Id:          m.Id,
 			Title:       m.Title,
-			Synopsis:    m.Synopsis,
-			Duration:    m.Duration,
+			PosterUrl:   m.PosterUrl,
 			ReleaseDate: m.ReleaseDate,
-			Director: dto.Director{
-				Id:   m.Director.Id,
-				Name: m.Director.Name,
-			},
-			Cast:            m.Cast,
-			PosterUrl:       m.PosterUrl,
-			BackDropUrl:     m.BackDropUrl,
-			PopularityScore: m.PopularityScore,
-			GenresName:      m.GenresName,
+			GenresName:  m.GenresName,
 		})
 	}
 

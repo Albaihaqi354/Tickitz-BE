@@ -21,19 +21,16 @@ func NewMoviesRepository(db *pgxpool.Pool) *MovieRepository {
 func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDetail, error) {
 	sqlStr := `
 		SELECT 
-			m.id, m.title, m.synopsis, m.duration, m.release_date, 
-			m.director_id, d.name AS director_name, 
-			STRING_AGG(DISTINCT a.name, ', ') AS "cast", 
-			m.poster_url, m.backdrop_url, m.popularity_score, 
-			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
+			m.id, 
+			m.title, 
+			m.poster_url, 
+			m.release_date, 
+			STRING_AGG(DISTINCT g.name, ', ') AS genres
 		FROM movies m 
-		LEFT JOIN directors d ON m.director_id = d.id 
-		LEFT JOIN movie_casts mc ON m.id = mc.movie_id 
-		LEFT JOIN actors a ON mc.actor_id = a.id 
 		LEFT JOIN movie_genres mg ON m.id = mg.movie_id 
 		LEFT JOIN genres g ON mg.genre_id = g.id 
 		WHERE m.release_date > CURRENT_DATE 
-		GROUP BY m.id, d.name 
+		GROUP BY m.id, m.title, m.poster_url, m.release_date 
 		ORDER BY m.release_date ASC;`
 	rows, err := m.db.Query(ctx, sqlStr)
 	if err != nil {
@@ -46,9 +43,11 @@ func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDet
 	for rows.Next() {
 		var movie model.MovieDetail
 		err := rows.Scan(
-			&movie.Id, &movie.Title, &movie.Synopsis, &movie.Duration, &movie.ReleaseDate,
-			&movie.Director.Id, &movie.Director.Name, &movie.Cast, &movie.PosterUrl, &movie.BackDropUrl,
-			&movie.PopularityScore, &movie.GenresName,
+			&movie.Id,
+			&movie.Title,
+			&movie.PosterUrl,
+			&movie.ReleaseDate,
+			&movie.GenresName,
 		)
 		if err != nil {
 			log.Println("Scan error:", err.Error())
