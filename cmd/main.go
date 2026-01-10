@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/config"
+	"github.com/Albaihaqi354/Tickitz-BE/internal/middleware"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/router"
 	"github.com/gin-gonic/gin"
 	"github.com/lpernett/godotenv"
@@ -21,6 +22,7 @@ func main() {
 	}
 
 	app := gin.Default()
+	app.Use(middleware.CORSMiddleware)
 	router.Init(app, db)
 	app.Run("localhost:5000")
 }
