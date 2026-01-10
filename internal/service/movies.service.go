@@ -38,3 +38,22 @@ func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingM
 
 	return response, nil
 }
+
+func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovie, error) {
+	movies, err := s.movieRepository.GetPopularMovie(ctx)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return nil, err
+	}
+
+	var response []dto.GetPopularMovie
+	for _, m := range movies {
+		response = append(response, dto.GetPopularMovie{
+			Id:         m.Id,
+			Title:      m.Title,
+			PosterUrl:  m.PosterUrl,
+			GenresName: m.GenresName,
+		})
+	}
+	return response, nil
+}

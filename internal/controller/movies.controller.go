@@ -36,3 +36,22 @@ func (ctrl MovieController) GetUpcomingMovies(c *gin.Context) {
 		Data:    data,
 	})
 }
+
+func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
+	data, err := ctrl.movieService.GetPopularMovie(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+			Data:    []any{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Get Upcoming Movies Success",
+		Success: true,
+		Data:    data,
+	})
+}

@@ -57,3 +57,42 @@ func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDet
 	}
 	return movies, nil
 }
+
+func (m MovieRepository) GetPopularMovie(ctx context.Context) ([]model.MovieDetail, error) {
+	sqlStr := `
+		SELECT 
+			m.id,
+			m.title,
+			m.poster_url,
+			m.popularity_score,
+			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
+		FROM movies m
+		LEFT JOIN movie_genres mg ON m.id = mg.movie_id
+		LEFT JOIN genres g ON mg.genre_id = g.id
+		GROUP BY m.id, m.title, m.poster_url, m.popularity_score
+		ORDER BY m.popularity_score DESC;`
+	rows, err := m.db.Query(ctx, sqlStr)
+	if err != nil {
+		log.Println("Query error:", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var movies []model.MovieDetail
+	for rows.Next() {
+		var movie model.MovieDetail
+		err := rows.Scan(
+			&movie.Id,
+			&movie.Title,
+			&movie.PosterUrl,
+			&movie.PopularityScore,
+			&movie.GenresName,
+		)
+		if err != nil {
+			log.Println("Scan error:", err.Error())
+			return nil, err
+		}
+		movies = append(movies, movie)
+	}
+	return movies, nil
+}

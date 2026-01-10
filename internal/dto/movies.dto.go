@@ -9,3 +9,10 @@ type GetUpcomingMovie struct {
 	ReleaseDate time.Time `json:"release_date"`
 	GenresName  string    `json:"genres"`
 }
+
+type GetPopularMovie struct {
+	Id         int    `json:"id"`
+	Title      string `json:"title"`
+	PosterUrl  string `json:"poster_url"`
+	GenresName string `json:"genres"`
+}
