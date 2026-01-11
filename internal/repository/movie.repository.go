@@ -152,7 +152,6 @@ func (m MovieRepository) GetMovieDetail(ctx context.Context, idDetail *int) ([]m
 			STRING_AGG(DISTINCT a.name, ', ') AS "cast",
 			m.poster_url,
 			m.backdrop_url,
-			m.popularity_score,
 			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
 		FROM movies m
 		LEFT JOIN directors d ON m.director_id = d.id
@@ -183,7 +182,6 @@ func (m MovieRepository) GetMovieDetail(ctx context.Context, idDetail *int) ([]m
 			&movie.Cast,
 			&movie.PosterUrl,
 			&movie.BackDropUrl,
-			&movie.PopularityScore,
 			&movie.GenresName,
 		)
 		if err != nil {
