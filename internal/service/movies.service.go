@@ -95,7 +95,7 @@ func (s MovieService) GetMovieDetail(ctx context.Context, idDetail *int) ([]dto.
 			Director:    m.Director,
 			Cast:        m.Cast,
 			PosterUrl:   m.PosterUrl,
-			BackDropUrl: m.BackDropUrl,
+			BackDropUrl: m.BackdropUrl,
 			GenresName:  m.GenresName,
 		})
 	}

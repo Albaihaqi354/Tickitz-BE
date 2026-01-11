@@ -181,7 +181,7 @@ func (m MovieRepository) GetMovieDetail(ctx context.Context, idDetail *int) ([]m
 			&movie.Director,
 			&movie.Cast,
 			&movie.PosterUrl,
-			&movie.BackDropUrl,
+			&movie.BackdropUrl,
 			&movie.GenresName,
 		)
 		if err != nil {

@@ -8,10 +8,13 @@ type Movie struct {
 	Synopsis        string    `db:"synopsis"`
 	Duration        int       `db:"duration"`
 	ReleaseDate     time.Time `db:"release_date"`
+	DirectorId      int       `db:"director_id"`
 	Director        string    `db:"director"`
 	PosterUrl       string    `db:"poster_url"`
-	BackDropUrl     string    `db:"backdrop_url"`
+	BackdropUrl     string    `db:"backdrop_url"`
 	PopularityScore float64   `db:"popularity_score"`
+	CreatedAt       time.Time `db:"created_at"`
+	UpdatedAt       time.Time `db:"updated_at"`
 }
 
 type Director struct {
@@ -32,17 +35,28 @@ type Genre struct {
 }
 
 type MovieGenre struct {
-	MovieID int `db:"movie_id"`
-	GenreID int `db:"genre_id"`
+	MovieId int `db:"movie_id"`
+	GenreId int `db:"genre_id"`
 }
 
 type MovieCast struct {
-	MovieID int `db:"movie_id"`
-	ActorID int `db:"actor_id"`
+	MovieId int `db:"movie_id"`
+	ActorId int `db:"actor_id"`
 }
 
 type MovieDetail struct {
-	Movie
-	Cast       string `db:"cast"`
-	GenresName string `db:"genre_name"`
+	Id              int       `db:"id"`
+	Title           string    `db:"title"`
+	Synopsis        string    `db:"synopsis"`
+	Duration        int       `db:"duration"`
+	ReleaseDate     time.Time `db:"release_date"`
+	Director        string    `db:"director"`
+	Cast            string    `db:"cast"`
+	PosterUrl       string    `db:"poster_url"`
+	BackdropUrl     string    `db:"backdrop_url"`
+	PopularityScore float64   `db:"popularity_score"`
+	CreatedAt       time.Time `db:"created_at"`
+	UpdatedAt       time.Time `db:"updated_at"`
+	GenresName      string    `db:"genre_name"`
+	ScheduleCount   int       `db:"schedule_count"`
 }
