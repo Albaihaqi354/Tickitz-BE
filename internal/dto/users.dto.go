@@ -30,10 +30,23 @@ type LoginResponse struct {
 	Id    int    `json:"id"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
+	Token string `json:"token"`
 }
 
 type RegisterResponse struct {
 	Id    int    `json:"id"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
+}
+
+type GetProfile struct {
+	Id            int       `json:"id"`
+	Email         string    `json:"email"`
+	FirstName     string    `json:"first_name"`
+	LastName      string    `json:"last_name"`
+	PhoneNumber   string    `json:"phone_number"`
+	ProfileImage  string    `json:"profile_image"`
+	LoyaltyPoints int       `json:"loyalty_points"`
+	Role          string    `json:"role"`
+	CreatedAt     time.Time `json:"created_at"`
 }

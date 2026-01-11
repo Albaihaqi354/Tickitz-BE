@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
@@ -38,5 +39,42 @@ func (u UserRepository) FindUserByEmail(ctx context.Context, email string) (mode
 	if err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Role); err != nil {
 		return model.User{}, err
 	}
+	return user, nil
+}
+
+func (u UserRepository) GetProfile(ctx context.Context, userId int) (model.User, error) {
+	sqlStr := `
+		SELECT 
+			id, 
+			email, 
+			first_name, 
+			last_name, 
+			phone_number, 
+			profile_image, 
+			loyalty_points, 
+			role,
+			created_at
+		FROM users
+		WHERE id = $1;`
+
+	row := u.db.QueryRow(ctx, sqlStr, userId)
+
+	var user model.User
+	err := row.Scan(
+		&user.Id,
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
+		&user.PhoneNumber,
+		&user.ProfileImage,
+		&user.LoyaltyPoints,
+		&user.Role,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		log.Println("Scan error:", err.Error())
+		return model.User{}, err
+	}
+
 	return user, nil
 }

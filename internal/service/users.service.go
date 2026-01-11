@@ -68,11 +68,39 @@ func (u UserService) Login(ctx context.Context, loginReq dto.LoginRequest) (dto.
 		return dto.LoginResponse{}, errors.New("invalid email or password")
 	}
 
+	jwtClaim := pkg.NewJWTClaim(user.Id, user.Email, user.Role)
+	token, err := jwtClaim.GetToken()
+	if err != nil {
+		log.Println("Error generating token:", err.Error())
+		return dto.LoginResponse{}, errors.New("internal server error")
+	}
+
 	response := dto.LoginResponse{
 		Id:    user.Id,
 		Email: user.Email,
 		Role:  user.Role,
+		Token: token,
 	}
 
+	return response, nil
+}
+
+func (u UserService) GetProfile(ctx context.Context, userId int) (dto.GetProfile, error) {
+	user, err := u.userRepository.GetProfile(ctx, userId)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return dto.GetProfile{}, err
+	}
+	response := dto.GetProfile{
+		Id:            user.Id,
+		Email:         user.Email,
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		PhoneNumber:   user.PhoneNumber,
+		ProfileImage:  user.ProfileImage,
+		LoyaltyPoints: user.LoyaltyPoints,
+		Role:          user.Role,
+		CreatedAt:     user.CreatedAt,
+	}
 	return response, nil
 }
