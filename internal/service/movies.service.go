@@ -57,3 +57,22 @@ func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovi
 	}
 	return response, nil
 }
+
+func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, genreId *int) ([]dto.GetMovieWitFilter, error) {
+	movies, err := s.movieRepository.GetMovieWithFilter(ctx, search, genreId)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return nil, err
+	}
+
+	var response []dto.GetMovieWitFilter
+	for _, m := range movies {
+		response = append(response, dto.GetMovieWitFilter{
+			Id:         m.Id,
+			Title:      m.Title,
+			PosterUrl:  m.PosterUrl,
+			GenresName: m.GenresName,
+		})
+	}
+	return response, nil
+}
