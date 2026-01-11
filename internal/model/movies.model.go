@@ -8,7 +8,7 @@ type Movie struct {
 	Synopsis        string    `db:"synopsis"`
 	Duration        int       `db:"duration"`
 	ReleaseDate     time.Time `db:"release_date"`
-	Director        Director  `db:"director"`
+	Director        string    `db:"director"`
 	PosterUrl       string    `db:"poster_url"`
 	BackDropUrl     string    `db:"backdrop_url"`
 	PopularityScore float64   `db:"popularity_score"`

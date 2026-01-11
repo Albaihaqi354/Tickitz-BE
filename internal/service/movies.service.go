@@ -76,3 +76,28 @@ func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, ge
 	}
 	return response, nil
 }
+
+func (s MovieService) GetMovieDetail(ctx context.Context, idDetail *int) ([]dto.GetMovieDetail, error) {
+	movies, err := s.movieRepository.GetMovieDetail(ctx, idDetail)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return nil, err
+	}
+
+	var response []dto.GetMovieDetail
+	for _, m := range movies {
+		response = append(response, dto.GetMovieDetail{
+			Id:          m.Id,
+			Title:       m.Title,
+			Synopsis:    m.Synopsis,
+			Duration:    m.Duration,
+			ReleaseDate: m.ReleaseDate,
+			Director:    m.Director,
+			Cast:        m.Cast,
+			PosterUrl:   m.PosterUrl,
+			BackDropUrl: m.BackDropUrl,
+			GenresName:  m.GenresName,
+		})
+	}
+	return response, nil
+}

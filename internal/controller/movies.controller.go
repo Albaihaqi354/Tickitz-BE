@@ -95,3 +95,37 @@ func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 		Data:    data,
 	})
 }
+
+func (ctr MovieController) GetMovieDetail(c *gin.Context) {
+	var idDetail *int
+	if detail := c.Query("movie_id"); detail != "" {
+		id, err := strconv.Atoi(detail)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.Response{
+				Msg:     "Invalid Detai_id Parameter",
+				Success: false,
+				Error:   err.Error(),
+				Data:    []any{},
+			})
+			return
+		}
+		idDetail = &id
+	}
+
+	data, err := ctr.movieService.GetMovieDetail(c.Request.Context(), idDetail)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+			Data:    []any{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Get Detail Movie Succes",
+		Success: true,
+		Data:    data,
+	})
+}
