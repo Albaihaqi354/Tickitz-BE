@@ -46,3 +46,12 @@ func (a AdminService) GetAllMovieAdmin(ctx context.Context) ([]dto.GetAllMovieAd
 	}
 	return response, nil
 }
+
+func (a AdminService) DeleteMovieAdmin(ctx context.Context, movieId int) error {
+	err := a.adminRepository.DeleteMovieAdmin(ctx, movieId)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return err
+	}
+	return nil
+}
