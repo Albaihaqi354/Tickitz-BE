@@ -133,3 +133,38 @@ func (u UserService) GetHistory(ctx context.Context, userId int) ([]dto.GetHisto
 	}
 	return response, nil
 }
+
+func (u UserService) UpdatePassword(ctx context.Context, userId int, req dto.UpdatePasswordRequest) error {
+	currentHashedPassword, err := u.userRepository.GetPasswordById(ctx, userId)
+	if err != nil {
+		log.Println("Error fetching password from DB:", err.Error())
+		return errors.New("internal server error")
+	}
+
+	hashConfig := &pkg.HashConfig{}
+	hashConfig.UseRecomended()
+
+	isValid, err := hashConfig.ComparePwdAndHash(req.OldPassword, currentHashedPassword)
+	if err != nil {
+		log.Println("Error comparing passwords:", err.Error())
+		return errors.New("internal server error")
+	}
+
+	if !isValid {
+		return errors.New("invalid old password")
+	}
+
+	newHashedPassword, err := hashConfig.GenHash(req.NewPassword)
+	if err != nil {
+		log.Println("Error hashing new password:", err.Error())
+		return errors.New("internal server error")
+	}
+
+	err = u.userRepository.UpdatePassword(ctx, userId, newHashedPassword)
+	if err != nil {
+		log.Println("Error updating password in DB:", err.Error())
+		return errors.New("internal server error")
+	}
+
+	return nil
+}

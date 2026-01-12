@@ -20,5 +20,6 @@ func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool) {
 	{
 		g.GET("/profile", userController.GetProfile)
 		g.GET("/history", userController.GetHistory)
+		g.PATCH("/password", userController.UpdatePassword)
 	}
 }

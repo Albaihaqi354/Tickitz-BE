@@ -168,3 +168,65 @@ func (u UserController) GetHistory(c *gin.Context) {
 		Data:    history,
 	})
 }
+
+func (u UserController) UpdatePassword(c *gin.Context) {
+	userId, exist := c.Get("user_id")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, dto.Response{
+			Msg:     "Unauthorized",
+			Success: false,
+			Error:   "User Id Not Found",
+			Data:    nil,
+		})
+		return
+	}
+
+	userIdInt, ok := userId.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   "Invalid User Id",
+			Data:    nil,
+		})
+		return
+	}
+
+	var req dto.UpdatePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Bad Request",
+			Success: false,
+			Error:   "Invalid request body",
+			Data:    nil,
+		})
+		return
+	}
+
+	err := u.userService.UpdatePassword(c.Request.Context(), userIdInt, req)
+	if err != nil {
+		if err.Error() == "invalid old password" {
+			c.JSON(http.StatusBadRequest, dto.Response{
+				Msg:     "Bad Request",
+				Success: false,
+				Error:   err.Error(),
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Update Password Success",
+		Success: true,
+		Data:    nil,
+	})
+}

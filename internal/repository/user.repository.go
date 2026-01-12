@@ -141,3 +141,19 @@ func (u UserRepository) GetHistory(ctx context.Context, userId int) ([]model.Get
 
 	return histories, nil
 }
+
+func (u UserRepository) GetPasswordById(ctx context.Context, userId int) (string, error) {
+	sqlStr := "SELECT password FROM users WHERE id = $1"
+	var password string
+	err := u.db.QueryRow(ctx, sqlStr, userId).Scan(&password)
+	if err != nil {
+		return "", err
+	}
+	return password, nil
+}
+
+func (u UserRepository) UpdatePassword(ctx context.Context, userId int, hashedPassword string) error {
+	sqlStr := "UPDATE users SET password = $1, updated_at = now() WHERE id = $2"
+	_, err := u.db.Exec(ctx, sqlStr, hashedPassword, userId)
+	return err
+}

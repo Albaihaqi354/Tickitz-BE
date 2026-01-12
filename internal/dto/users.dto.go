@@ -66,3 +66,8 @@ type GetHistory struct {
 	ShowTime      time.Time `json:"show_time"`
 	TicketCount   int       `json:"ticket_count"`
 }
+
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
