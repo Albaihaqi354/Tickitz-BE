@@ -127,3 +127,44 @@ func (u UserController) GetProfile(c *gin.Context) {
 		Data:    profile,
 	})
 }
+
+func (u UserController) GetHistory(c *gin.Context) {
+	userId, exist := c.Get("user_id")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, dto.Response{
+			Msg:     "Unauthorized",
+			Success: false,
+			Error:   "User Id Not Found",
+			Data:    nil,
+		})
+		return
+	}
+
+	userIdInt, ok := userId.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   "Invalid User Id",
+			Data:    nil,
+		})
+		return
+	}
+
+	history, err := u.userService.GetHistory(c.Request.Context(), userIdInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Get History Success",
+		Success: true,
+		Data:    history,
+	})
+}

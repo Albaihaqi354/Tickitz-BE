@@ -104,3 +104,32 @@ func (u UserService) GetProfile(ctx context.Context, userId int) (dto.GetProfile
 	}
 	return response, nil
 }
+
+func (u UserService) GetHistory(ctx context.Context, userId int) ([]dto.GetHistory, error) {
+	histories, err := u.userRepository.GetHistory(ctx, userId)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return nil, err
+	}
+
+	var response []dto.GetHistory
+	for _, history := range histories {
+		h := dto.GetHistory{
+			Id:            history.Id,
+			BookingCode:   history.BookingCode,
+			TotalPrice:    history.TotalPrice,
+			PaymentStatus: history.PaymentStatus,
+			CreatedAt:     history.CreatedAt,
+			MovieId:       history.MovieId,
+			Title:         history.Title,
+			PosterUrl:     history.PosterUrl,
+			CinemaName:    history.CinemaName,
+			CinemaLogo:    history.CinemaLogo,
+			ShowDate:      history.ShowDate,
+			ShowTime:      history.ShowTime,
+			TicketCount:   history.TicketCount,
+		}
+		response = append(response, h)
+	}
+	return response, nil
+}

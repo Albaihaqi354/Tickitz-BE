@@ -50,3 +50,19 @@ type GetProfile struct {
 	Role          string    `json:"role"`
 	CreatedAt     time.Time `json:"created_at"`
 }
+
+type GetHistory struct {
+	Id            int       `json:"id"`
+	BookingCode   string    `json:"booking_code"`
+	TotalPrice    int       `json:"total_price"`
+	PaymentStatus string    `json:"payment_status"`
+	CreatedAt     time.Time `json:"created_at"`
+	MovieId       int       `json:"movie_id"`
+	Title         string    `json:"title"`
+	PosterUrl     string    `json:"poster_url"`
+	CinemaName    string    `json:"cinema_name"`
+	CinemaLogo    string    `json:"cinema_logo"`
+	ShowDate      time.Time `json:"show_date"`
+	ShowTime      time.Time `json:"show_time"`
+	TicketCount   int       `json:"ticket_count"`
+}
