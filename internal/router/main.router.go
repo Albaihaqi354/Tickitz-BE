@@ -28,9 +28,9 @@ func Init(app *gin.Engine, db *pgxpool.Pool) {
 	app.GET("/movies/upcoming", movieController.GetUpcomingMovies)
 	app.GET("/movies/popular", movieController.GetPopularMovie)
 	app.GET("/movies/filter", movieController.GetMovieWithFilter)
-	app.GET("/movies/detail", movieController.GetMovieDetail)
+	app.GET("/movies/detail/:id", movieController.GetMovieDetail)
 
-	app.GET("/admin/getMovies", middleware.VerifyToken, middleware.CheckRole("admin"), adminController.GetAllMovieAdmin)
+	app.GET("/admin/movies", middleware.VerifyToken, middleware.CheckRole("admin"), adminController.GetAllMovieAdmin)
 	app.DELETE("/admin/movies/:id", middleware.VerifyToken, middleware.CheckRole("admin"), adminController.DeleteMovieAdmin)
 
 	app.GET("/user/profile", middleware.VerifyToken, middleware.CheckRole("user"), userController.GetProfile)

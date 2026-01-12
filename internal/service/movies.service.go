@@ -77,8 +77,8 @@ func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, ge
 	return response, nil
 }
 
-func (s MovieService) GetMovieDetail(ctx context.Context, idDetail *int) ([]dto.GetMovieDetail, error) {
-	movies, err := s.movieRepository.GetMovieDetail(ctx, idDetail)
+func (s MovieService) GetMovieDetail(ctx context.Context, movieId int) ([]dto.GetMovieDetail, error) {
+	movies, err := s.movieRepository.GetMovieDetail(ctx, movieId)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
 		return nil, err

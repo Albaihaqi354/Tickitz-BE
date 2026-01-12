@@ -140,7 +140,7 @@ func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string,
 	return movies, nil
 }
 
-func (m MovieRepository) GetMovieDetail(ctx context.Context, idDetail *int) ([]model.MovieDetail, error) {
+func (m MovieRepository) GetMovieDetail(ctx context.Context, movieId int) ([]model.MovieDetail, error) {
 	sqlStr := `
 		SELECT
 			m.id,
@@ -162,7 +162,7 @@ func (m MovieRepository) GetMovieDetail(ctx context.Context, idDetail *int) ([]m
 		WHERE m.id = $1
 		GROUP BY m.id, d.name;`
 
-	rows, err := m.db.Query(ctx, sqlStr, idDetail)
+	rows, err := m.db.Query(ctx, sqlStr, movieId)
 	if err != nil {
 		log.Println("Query error:", err.Error())
 		return nil, err
