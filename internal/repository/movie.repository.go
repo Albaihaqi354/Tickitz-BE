@@ -97,7 +97,7 @@ func (m MovieRepository) GetPopularMovie(ctx context.Context) ([]model.MovieDeta
 	return movies, nil
 }
 
-func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string, genreId *int) ([]model.MovieDetail, error) {
+func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string, genreId *int, limit int, offset int) ([]model.MovieDetail, error) {
 	sqlStr := `
 		SELECT 
 			m.id,
@@ -113,9 +113,10 @@ func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string,
 				SELECT movie_id FROM movie_genres WHERE genre_id = $2
 			))
 		GROUP BY m.id, m.title, m.poster_url, m.release_date
-		ORDER BY m.release_date DESC;`
+		ORDER BY m.release_date DESC
+		LIMIT $3 OFFSET $4;`
 
-	rows, err := m.db.Query(ctx, sqlStr, search, genreId)
+	rows, err := m.db.Query(ctx, sqlStr, search, genreId, limit, offset)
 	if err != nil {
 		log.Println("Query error:", err.Error())
 		return nil, err
@@ -138,6 +139,22 @@ func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string,
 		movies = append(movies, movie)
 	}
 	return movies, nil
+}
+
+func (m MovieRepository) CountMovieWithFilter(ctx context.Context, search *string, genreId *int) (int, error) {
+	sqlStr := `
+		SELECT COUNT(DISTINCT m.id)
+		FROM movies m
+		LEFT JOIN movie_genres mg ON m.id = mg.movie_id
+		WHERE 
+			($1::TEXT IS NULL OR m.title ILIKE '%' || $1 || '%') AND
+			($2::INTEGER IS NULL OR m.id IN (
+				SELECT movie_id FROM movie_genres WHERE genre_id = $2
+			))`
+
+	var count int
+	err := m.db.QueryRow(ctx, sqlStr, search, genreId).Scan(&count)
+	return count, err
 }
 
 func (m MovieRepository) GetMovieDetail(ctx context.Context, movieId int) ([]model.MovieDetail, error) {

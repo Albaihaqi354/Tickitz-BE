@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"math"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
@@ -58,12 +59,21 @@ func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovi
 	return response, nil
 }
 
-func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, genreId *int) ([]dto.GetMovieWitFilter, error) {
-	movies, err := s.movieRepository.GetMovieWithFilter(ctx, search, genreId)
+func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, genreId *int, page int, limit int) ([]dto.GetMovieWitFilter, dto.PaginationMeta, error) {
+	offset := (page - 1) * limit
+	movies, err := s.movieRepository.GetMovieWithFilter(ctx, search, genreId, limit, offset)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
-		return nil, err
+		return nil, dto.PaginationMeta{}, err
 	}
+
+	totalData, err := s.movieRepository.CountMovieWithFilter(ctx, search, genreId)
+	if err != nil {
+		log.Println("Service Error (Count):", err.Error())
+		return nil, dto.PaginationMeta{}, err
+	}
+
+	totalPage := int(math.Ceil(float64(totalData) / float64(limit)))
 
 	var response []dto.GetMovieWitFilter
 	for _, m := range movies {
@@ -74,7 +84,13 @@ func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, ge
 			GenresName: m.GenresName,
 		})
 	}
-	return response, nil
+
+	meta := dto.PaginationMeta{
+		Page:      page,
+		TotalPage: totalPage,
+	}
+
+	return response, meta, nil
 }
 
 func (s MovieService) GetMovieDetail(ctx context.Context, movieId int) ([]dto.GetMovieDetail, error) {

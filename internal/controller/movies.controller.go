@@ -78,7 +78,10 @@ func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 		genreId = &id
 	}
 
-	data, err := ctrl.movieService.GetMovieWithFilter(c.Request.Context(), search, genreId)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "16"))
+
+	data, meta, err := ctrl.movieService.GetMovieWithFilter(c.Request.Context(), search, genreId, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Response{
 			Msg:     "Internal Server Error",
@@ -93,6 +96,7 @@ func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 		Msg:     "Get Filter Movie Success",
 		Success: true,
 		Data:    data,
+		Meta:    meta,
 	})
 }
 
