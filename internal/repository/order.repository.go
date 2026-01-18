@@ -117,14 +117,19 @@ func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, scheduleId in
 			se.seat_number,
 			se.seat_type,
 			CASE 
-				WHEN od.id IS NOT NULL THEN 'sold'
+				WHEN EXISTS (
+					SELECT 1 
+					FROM orders o 
+					JOIN order_details od ON od.order_id = o.id 
+					WHERE o.schedule_id = sch.id 
+						AND o.payment_status = 'paid' 
+						AND od.seat_id = se.id
+				) THEN 'sold'
 				ELSE 'available'
 			END AS status
 		FROM schedules sch
 		INNER JOIN cinemas c ON sch.cinema_id = c.id
 		INNER JOIN seats se ON se.cinema_id = c.id
-		LEFT JOIN orders o ON o.schedule_id = sch.id AND o.payment_status = 'paid'
-		LEFT JOIN order_details od ON od.order_id = o.id AND od.seat_id = se.id
 		WHERE sch.id = $1
 		ORDER BY se.row_letter, se.seat_number;
 	`
@@ -152,4 +157,14 @@ func (o OrderRepository) GetPriceFromSchedule(ctx context.Context, scheduleId in
 	var price int
 	err := o.db.QueryRow(ctx, sqlStr, scheduleId).Scan(&price)
 	return price, err
+}
+
+func (o OrderRepository) UpdatePaymentStatus(ctx context.Context, orderId int, status string) error {
+	sqlStr := "UPDATE orders SET payment_status = $1 WHERE id = $2"
+	_, err := o.db.Exec(ctx, sqlStr, status, orderId)
+	if err != nil {
+		log.Println("UpdatePaymentStatus Error:", err.Error())
+		return err
+	}
+	return nil
 }

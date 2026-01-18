@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -93,4 +94,51 @@ func (a AdminRepository) DeleteMovieAdmin(ctx context.Context, movieId int) erro
 	}
 
 	return nil
+}
+
+func (a AdminRepository) UpdateMovieAdmin(ctx context.Context, id int, req dto.UpdateMovieRequest) (model.Movie, error) {
+	sqlStr := `
+		UPDATE movies
+		SET 
+			title = COALESCE($1, title),
+			synopsis = COALESCE($2, synopsis),
+			duration = COALESCE($3, duration),
+			release_date = COALESCE($4, release_date),
+			director_id = COALESCE($5, director_id),
+			poster_url = COALESCE($6, poster_url),
+			backdrop_url = COALESCE($7, backdrop_url),
+			popularity_score = COALESCE($8, popularity_score),
+			updated_at = NOW()
+		WHERE id = $9
+		RETURNING id, title, synopsis, duration, release_date, director_id, poster_url, backdrop_url, popularity_score;`
+
+	var m model.Movie
+	err := a.db.QueryRow(ctx, sqlStr,
+		req.Title,
+		req.Synopsis,
+		req.Duration,
+		req.ReleaseDate,
+		req.DirectorId,
+		req.PosterUrl,
+		req.BackdropUrl,
+		req.PopularityScore,
+		id,
+	).Scan(
+		&m.Id,
+		&m.Title,
+		&m.Synopsis,
+		&m.Duration,
+		&m.ReleaseDate,
+		&m.DirectorId,
+		&m.PosterUrl,
+		&m.BackdropUrl,
+		&m.PopularityScore,
+	)
+
+	if err != nil {
+		log.Println("Update Error:", err.Error())
+		return model.Movie{}, err
+	}
+
+	return m, nil
 }

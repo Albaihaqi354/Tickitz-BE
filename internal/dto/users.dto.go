@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type User struct {
 	Id            int       `json:"id"`
@@ -70,4 +73,20 @@ type GetHistory struct {
 type UpdatePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required"`
+}
+
+type UpdateProfileRequest struct {
+	FirstName    *string               `form:"first_name"`
+	LastName     *string               `form:"last_name"`
+	PhoneNumber  *string               `form:"phone_number"`
+	Image        *multipart.FileHeader `form:"image"`
+	ProfileImage *string               `form:"-"`
+}
+
+type UpdateProfileResponse struct {
+	Id           int    `json:"id"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	PhoneNumber  string `json:"phone_number"`
+	ProfileImage string `json:"profile_image"`
 }

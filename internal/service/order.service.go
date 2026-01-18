@@ -88,3 +88,11 @@ func (o OrderService) CreateOrder(ctx context.Context, userId int, req dto.Creat
 
 	return id, bookingCode, createdAt, nil
 }
+func (o OrderService) UpdatePaymentStatus(ctx context.Context, orderId int, status string) error {
+	err := o.orderRepository.UpdatePaymentStatus(ctx, orderId, status)
+	if err != nil {
+		log.Println("Service Error (UpdatePaymentStatus):", err.Error())
+		return err
+	}
+	return nil
+}

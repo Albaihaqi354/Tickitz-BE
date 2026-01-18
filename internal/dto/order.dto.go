@@ -27,3 +27,6 @@ type SeatResponse struct {
 	SeatType   string `json:"seat_type"`
 	Status     string `json:"status"`
 }
+type UpdateOrderRequest struct {
+	PaymentStatus string `json:"payment_status" binding:"required"`
+}

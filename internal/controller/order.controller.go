@@ -19,6 +19,19 @@ func NewOrderController(orderService *service.OrderService) *OrderController {
 	}
 }
 
+// GetSchedules godoc
+// @Summary      Get schedules for a movie
+// @Description  Get list of schedules with cinema details filtered by movie ID, date, and city
+// @Tags         orders
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int     true  "Movie ID"
+// @Param        date  query     string  false "Show Date (YYYY-MM-DD)"
+// @Param        city  query     string  false "City Name"
+// @Success      200   {object}  dto.Response{data=[]dto.GetSchedules}
+// @Failure      400   {object}  dto.Response
+// @Failure      500   {object}  dto.Response
+// @Router       /orders/schedules/{id} [get]
 func (ctrl OrderController) GetSchedules(c *gin.Context) {
 	idParam := c.Param("id")
 	movieId, err := strconv.Atoi(idParam)
@@ -62,6 +75,17 @@ func (ctrl OrderController) GetSchedules(c *gin.Context) {
 	})
 }
 
+// GetSeats godoc
+// @Summary      Get seats for a schedule
+// @Description  Get list of seats status (sold/available) for a specific schedule ID
+// @Tags         orders
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Schedule ID"
+// @Success      200  {object}  dto.Response{data=[]dto.SeatResponse}
+// @Failure      400  {object}  dto.Response
+// @Failure      500  {object}  dto.Response
+// @Router       /orders/seats/{id} [get]
 func (ctrl OrderController) GetSeats(c *gin.Context) {
 	idParam := c.Param("id")
 	scheduleId, err := strconv.Atoi(idParam)
@@ -93,6 +117,19 @@ func (ctrl OrderController) GetSeats(c *gin.Context) {
 	})
 }
 
+// CreateOrder godoc
+// @Summary      Create a new order
+// @Description  Create a new ticket order for a user (Requires user token)
+// @Tags         orders
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        order  body      dto.CreateOrderRequest  true  "Order Body"
+// @Success      201    {object}  dto.Response
+// @Failure      401    {object}  dto.Response
+// @Failure      400    {object}  dto.Response
+// @Failure      500    {object}  dto.Response
+// @Router       /orders [post]
 func (ctrl OrderController) CreateOrder(c *gin.Context) {
 	userId, exist := c.Get("user_id")
 	if !exist {
@@ -146,5 +183,61 @@ func (ctrl OrderController) CreateOrder(c *gin.Context) {
 			"booking_code": bookingCode,
 			"created_at":   createdAt,
 		},
+	})
+}
+
+// UpdatePaymentStatus godoc
+// @Summary      Update order payment status
+// @Description  Update the payment status of an order (Requires admin token)
+// @Tags         orders
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      int                     true  "Order ID"
+// @Param        status  body      dto.UpdateOrderRequest  true  "Status Body"
+// @Success      200     {object}  dto.Response
+// @Failure      401     {object}  dto.Response
+// @Failure      400     {object}  dto.Response
+// @Failure      500     {object}  dto.Response
+// @Router       /orders/{id} [patch]
+func (ctrl OrderController) UpdatePaymentStatus(c *gin.Context) {
+	idParam := c.Param("id")
+	orderId, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Invalid order_id parameter",
+			Success: false,
+			Error:   err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	var req dto.UpdateOrderRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Bad Request",
+			Success: false,
+			Error:   err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	err = ctrl.orderService.UpdatePaymentStatus(c.Request.Context(), orderId, req.PaymentStatus)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Update Payment Status Success",
+		Success: true,
+		Data:    nil,
 	})
 }

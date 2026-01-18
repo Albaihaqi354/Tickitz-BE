@@ -55,3 +55,25 @@ func (a AdminService) DeleteMovieAdmin(ctx context.Context, movieId int) error {
 	}
 	return nil
 }
+
+func (a AdminService) UpdateMovieAdmin(ctx context.Context, id int, req dto.UpdateMovieRequest) (dto.UpdateMovieResponse, error) {
+	updatedMovie, err := a.adminRepository.UpdateMovieAdmin(ctx, id, req)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return dto.UpdateMovieResponse{}, err
+	}
+
+	response := dto.UpdateMovieResponse{
+		Id:              updatedMovie.Id,
+		Title:           updatedMovie.Title,
+		Synopsis:        updatedMovie.Synopsis,
+		Duration:        updatedMovie.Duration,
+		ReleaseDate:     updatedMovie.ReleaseDate,
+		DirectorId:      updatedMovie.DirectorId,
+		PosterUrl:       updatedMovie.PosterUrl,
+		BackdropUrl:     updatedMovie.BackdropUrl,
+		PopularityScore: updatedMovie.PopularityScore,
+	}
+
+	return response, nil
+}

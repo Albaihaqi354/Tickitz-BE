@@ -20,5 +20,6 @@ func RegisterAdminRouter(app *gin.Engine, db *pgxpool.Pool) {
 	{
 		g.GET("/movies", adminController.GetAllMovieAdmin)
 		g.DELETE("/movies/:id", adminController.DeleteMovieAdmin)
+		g.PATCH("/movies/:id", adminController.UpdateMovieAdmin)
 	}
 }
