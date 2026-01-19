@@ -19,38 +19,15 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 	}
 }
 
-func (u UserRepository) CreateNewUser(ctx context.Context, newUser dto.NewUser) (model.User, error) {
-	sql := "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email, password, role"
-	values := []any{newUser.Email, newUser.Password}
-
-	row := u.db.QueryRow(ctx, sql, values...)
-	var user model.User
-	if err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Role); err != nil {
-		return model.User{}, err
-	}
-	return user, nil
-}
-
-func (u UserRepository) FindUserByEmail(ctx context.Context, email string) (model.User, error) {
-	sql := "SELECT id, email, password, role FROM users WHERE email = $1"
-
-	row := u.db.QueryRow(ctx, sql, email)
-	var user model.User
-	if err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Role); err != nil {
-		return model.User{}, err
-	}
-	return user, nil
-}
-
 func (u UserRepository) GetProfile(ctx context.Context, userId int) (model.User, error) {
 	sqlStr := `
 		SELECT 
 			id, 
 			email, 
-			first_name, 
-			last_name, 
-			phone_number, 
-			profile_image, 
+			COALESCE(first_name, ''), 
+			COALESCE(last_name, ''), 
+			COALESCE(phone_number, ''), 
+			COALESCE(profile_image, ''), 
 			loyalty_points, 
 			role,
 			created_at
@@ -156,4 +133,39 @@ func (u UserRepository) UpdatePassword(ctx context.Context, userId int, hashedPa
 	sqlStr := "UPDATE users SET password = $1, updated_at = now() WHERE id = $2"
 	_, err := u.db.Exec(ctx, sqlStr, hashedPassword, userId)
 	return err
+}
+
+func (u UserRepository) UpdateProfile(ctx context.Context, userId int, req dto.UpdateProfileRequest) (model.User, error) {
+	sqlStr := `
+		UPDATE users
+		SET
+			first_name = COALESCE($1, first_name),
+			last_name = COALESCE($2, last_name),
+			phone_number = COALESCE($3, phone_number),
+			profile_image = COALESCE($4, profile_image),
+			updated_at = NOW()
+		WHERE id = $5
+		RETURNING id, COALESCE(first_name, ''), COALESCE(last_name, ''), COALESCE(phone_number, ''), COALESCE(profile_image, '');
+	`
+
+	var m model.User
+	err := u.db.QueryRow(ctx, sqlStr,
+		req.FirstName,
+		req.LastName,
+		req.PhoneNumber,
+		req.ProfileImage,
+		userId,
+	).Scan(
+		&m.Id,
+		&m.FirstName,
+		&m.LastName,
+		&m.PhoneNumber,
+		&m.ProfileImage,
+	)
+
+	if err != nil {
+		log.Println("Update Error", err.Error())
+		return model.User{}, err
+	}
+	return m, nil
 }

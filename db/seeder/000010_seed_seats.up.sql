@@ -1,0 +1,13 @@
+INSERT INTO "seats" ("cinema_id", "row_letter", "seat_number", "seat_type") VALUES
+(1, 'A', 1, 'regular'), (1, 'A', 2, 'regular'), (1, 'A', 3, 'regular'), (1, 'A', 4, 'regular'), (1, 'A', 5, 'regular'),
+(1, 'A', 6, 'regular'), (1, 'A', 7, 'regular'), (1, 'A', 8, 'regular'), (1, 'A', 9, 'regular'), (1, 'A', 10, 'regular'),
+(2, 'A', 1, 'regular'), (2, 'A', 2, 'regular'), (2, 'A', 3, 'regular'), (2, 'A', 4, 'regular'), (2, 'A', 5, 'regular'),
+(2, 'B', 1, 'premium'), (2, 'B', 2, 'premium'), (2, 'B', 3, 'premium'), (2, 'B', 4, 'premium'), (2, 'B', 5, 'premium'),
+(3, 'A', 1, 'regular'), (3, 'A', 2, 'regular'), (3, 'A', 3, 'regular'), (3, 'A', 4, 'regular'), (3, 'A', 5, 'regular'),
+(3, 'A', 6, 'regular'), (3, 'A', 7, 'regular'), (3, 'A', 8, 'regular'), (3, 'A', 9, 'regular'), (3, 'A', 10, 'regular'),
+(4, 'A', 1, 'love_nest'), (4, 'A', 2, 'love_nest'), (4, 'A', 3, 'regular'), (4, 'A', 4, 'regular'), (4, 'A', 5, 'regular'),
+(4, 'B', 1, 'love_nest'), (4, 'B', 2, 'love_nest'), (4, 'B', 3, 'regular'), (4, 'B', 4, 'regular'), (4, 'B', 5, 'regular'),
+(5, 'A', 1, 'regular'), (5, 'A', 2, 'regular'), (5, 'A', 3, 'regular'), (5, 'A', 4, 'regular'), (5, 'A', 5, 'regular'),
+(5, 'A', 6, 'regular'), (5, 'A', 7, 'regular'), (5, 'A', 8, 'regular'), (5, 'A', 9, 'regular'), (5, 'A', 10, 'regular'),
+(6, 'A', 1, 'regular'), (6, 'A', 2, 'regular'), (6, 'A', 3, 'regular'), (6, 'A', 4, 'regular'), (6, 'A', 5, 'regular'),
+(6, 'B', 1, 'premium'), (6, 'B', 2, 'premium'), (6, 'B', 3, 'premium'), (6, 'B', 4, 'premium'), (6, 'B', 5, 'premium'),

@@ -20,6 +20,6 @@ func RegisterOrderRouter(app *gin.Engine, db *pgxpool.Pool) {
 		g.GET("/seats/:id", orderController.GetSeats)
 
 		g.POST("/", middleware.VerifyToken, middleware.CheckRole("user"), orderController.CreateOrder)
-		g.PATCH("/:id", middleware.VerifyToken, middleware.CheckRole("admin"), orderController.UpdatePaymentStatus)
+		g.PATCH("/:id", middleware.VerifyToken, middleware.CheckRole("user"), orderController.UpdatePaymentStatus)
 	}
 }

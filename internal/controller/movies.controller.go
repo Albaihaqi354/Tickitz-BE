@@ -81,10 +81,9 @@ func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
 // @Tags         movies
 // @Accept       json
 // @Produce      json
-// @Param        search    query     string  false  "Search by title"
-// @Param        genre_id  query     int     false  "Filter by genre ID"
-// @Param        page      query     int     false  "Page number (default: 1)"
-// @Param        limit     query     int     false  "Items per page (default: 16)"
+// @Param        search    query     string   false  "Search by title"
+// @Param        genre_id  query     []int    false  "Filter by genre ID (can specify multiple)"  collectionFormat(multi)
+// @Param        page      query     int      false  "Page number (default: 1)"
 // @Success      200       {object}  dto.Response
 // @Failure      400       {object}  dto.Response
 // @Failure      500       {object}  dto.Response

@@ -9,11 +9,11 @@ import (
 )
 
 func RegisterAuthRouter(app *gin.Engine, db *pgxpool.Pool) {
-	userRepository := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepository)
-	userController := controller.NewUserController(userService)
+	authRepository := repository.NewAuthRepository(db)
+	authService := service.NewAuthService(authRepository)
+	authController := controller.NewAuthController(authService)
 
 	g := app.Group("/auth")
-	g.POST("/register", userController.AddUser)
-	g.POST("/login", userController.Login)
+	g.POST("/register", authController.Register)
+	g.POST("/login", authController.Login)
 }

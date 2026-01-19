@@ -36,5 +36,7 @@ func CORSMiddleware(c *gin.Context) {
 		}
 	} else if origin != "" {
 		log.Printf("Origin is not in the whitelist: %s", origin)
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 }

@@ -21,7 +21,7 @@ func NewJWTClaim(id int, email, role string) *JWTClaims {
 		Email: email,
 		Role:  role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 5)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 			Issuer:    os.Getenv("JWT_ISSUER"),
 		},
 	}

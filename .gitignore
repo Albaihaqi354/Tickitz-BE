@@ -2,3 +2,6 @@ go.mod
 go.sum
 .env
 .vscode
+
+tmp
+.air.toml
