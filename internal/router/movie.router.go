@@ -15,8 +15,8 @@ func RegisterMovieRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	movieController := controller.NewMovieController(movieService)
 
 	g := app.Group("/movies")
+	g.GET("/", movieController.GetMovieWithFilter)
 	g.GET("/upcoming", movieController.GetUpcomingMovies)
 	g.GET("/popular", movieController.GetPopularMovie)
-	g.GET("/filter", movieController.GetMovieWithFilter)
 	g.GET("/detail/:id", movieController.GetMovieDetail)
 }
