@@ -13,8 +13,8 @@ func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	RegisterAuthRouter(app, db)
-	RegisterMovieRouter(app, db)
+	RegisterMovieRouter(app, db, rdb)
 	RegisterAdminRouter(app, db)
-	RegisterUserRouter(app, db, rdb)
+	RegisterUserRouter(app, db)
 	RegisterOrderRouter(app, db)
 }

@@ -7,12 +7,11 @@ import (
 	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
 )
 
-func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool) {
 	userRepository := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepository, rdb)
+	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)
 
 	g := app.Group("/user")
