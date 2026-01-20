@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
@@ -97,7 +98,7 @@ func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        search    query     string   false  "Search by title"
-// @Param        genre_id  query     []int    false  "Filter by genre ID (can specify multiple)"  collectionFormat(multi)
+// @Param        genre_id  query     []int    false  "Filter by genre ID"
 // @Param        page      query     int      false  "Page number (default: 1)"
 // @Success      200       {object}  dto.Response
 // @Failure      400       {object}  dto.Response
@@ -109,25 +110,21 @@ func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 		search = &s
 	}
 
-	var genreId *int
-	if genre := c.Query("genre_id"); genre != "" {
-		id, err := strconv.Atoi(genre)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.Response{
-				Msg:     "Invalid genre_id parameter",
-				Success: false,
-				Error:   err.Error(),
-				Data:    []any{},
-			})
-			return
+	var genreIds []int
+	queryGenres := c.QueryArray("genre_id")
+	for _, q := range queryGenres {
+		parts := strings.Split(q, ",")
+		for _, p := range parts {
+			if id, err := strconv.Atoi(strings.TrimSpace(p)); err == nil {
+				genreIds = append(genreIds, id)
+			}
 		}
-		genreId = &id
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "16"))
 
-	data, meta, err := ctrl.movieService.GetMovieWithFilter(c.Request.Context(), search, genreId, page, limit)
+	data, meta, err := ctrl.movieService.GetMovieWithFilter(c.Request.Context(), search, genreIds, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Response{
 			Msg:     "Internal Server Error",

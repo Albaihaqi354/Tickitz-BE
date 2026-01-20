@@ -398,8 +398,8 @@ paths:
         in: query
         name: search
         type: string
-      - collectionFormat: multi
-        description: Filter by genre ID (can specify multiple)
+      - collectionFormat: csv
+        description: Filter by genre ID
         in: query
         items:
           type: integer

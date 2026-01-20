@@ -122,15 +122,15 @@ func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovi
 	return response, nil
 }
 
-func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, genreId *int, page int, limit int) ([]dto.GetMovieWitFilter, dto.PaginationMeta, error) {
+func (s MovieService) GetMovieWithFilter(ctx context.Context, search *string, genreIds []int, page int, limit int) ([]dto.GetMovieWitFilter, dto.PaginationMeta, error) {
 	offset := (page - 1) * limit
-	movies, err := s.movieRepository.GetMovieWithFilter(ctx, search, genreId, limit, offset)
+	movies, err := s.movieRepository.GetMovieWithFilter(ctx, search, genreIds, limit, offset)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
 		return nil, dto.PaginationMeta{}, err
 	}
 
-	totalData, err := s.movieRepository.CountMovieWithFilter(ctx, search, genreId)
+	totalData, err := s.movieRepository.CountMovieWithFilter(ctx, search, genreIds)
 	if err != nil {
 		log.Println("Service Error (Count):", err.Error())
 		return nil, dto.PaginationMeta{}, err

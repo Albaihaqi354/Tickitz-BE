@@ -313,8 +313,8 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "multi",
-                        "description": "Filter by genre ID (can specify multiple)",
+                        "collectionFormat": "csv",
+                        "description": "Filter by genre ID",
                         "name": "genre_id",
                         "in": "query"
                     },
