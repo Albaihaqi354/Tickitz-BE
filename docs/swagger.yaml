@@ -388,32 +388,7 @@ paths:
       summary: Register a new user
       tags:
       - auth
-  /movies/detail/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get detailed information about a specific movie
-      parameters:
-      - description: Movie ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.Response'
-      summary: Get movie detail
-      tags:
-      - movies
-  /movies/filter:
+  /movies:
     get:
       consumes:
       - application/json
@@ -450,6 +425,31 @@ paths:
           schema:
             $ref: '#/definitions/dto.Response'
       summary: Filter movies
+      tags:
+      - movies
+  /movies/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get movie detail
       tags:
       - movies
   /movies/popular:

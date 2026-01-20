@@ -2,24 +2,47 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"math"
+	"time"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
+	"github.com/redis/go-redis/v9"
 )
 
 type MovieService struct {
 	movieRepository *repository.MovieRepository
+	redis           *redis.Client
 }
 
-func NewMovieService(movieRepository *repository.MovieRepository) *MovieService {
+func NewMovieService(movieRepository *repository.MovieRepository, rdb *redis.Client) *MovieService {
 	return &MovieService{
 		movieRepository: movieRepository,
+		redis:           rdb,
 	}
 }
 
 func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingMovie, error) {
+	rkey := "bian:tickitz:upcommingMovie"
+	rsc := s.redis.Get(ctx, rkey)
+
+	if rsc.Err() == nil {
+		var result []dto.GetUpcomingMovie
+		cache, err := rsc.Bytes()
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			err := json.Unmarshal(cache, &result)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				return result, nil
+			}
+		}
+	}
+
 	movies, err := s.movieRepository.GetUpcomingMovie(ctx)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
@@ -37,10 +60,40 @@ func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingM
 		})
 	}
 
+	cachestr, err := json.Marshal(response)
+	if err != nil {
+		log.Println("failed to marshal", err.Error())
+	} else {
+		status := s.redis.Set(ctx, rkey, string(cachestr), 24*time.Hour)
+		if status.Err() != nil {
+			log.Println("caching failed:", status.Err().Error())
+		}
+	}
 	return response, nil
 }
 
 func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovie, error) {
+	rkey := "bian:tickitz:popularMovie"
+	rsc := s.redis.Get(ctx, rkey)
+
+	if rsc.Err() == nil {
+		var result []dto.GetPopularMovie
+		cache, err := rsc.Bytes()
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			err := json.Unmarshal(cache, &result)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				return result, nil
+			}
+		}
+	}
+	if rsc.Err() == redis.Nil {
+		log.Println("movie cache miss")
+	}
+
 	movies, err := s.movieRepository.GetPopularMovie(ctx)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
@@ -55,6 +108,16 @@ func (s MovieService) GetPopularMovie(ctx context.Context) ([]dto.GetPopularMovi
 			PosterUrl:  m.PosterUrl,
 			GenresName: m.GenresName,
 		})
+	}
+
+	cachestr, err := json.Marshal(response)
+	if err != nil {
+		log.Println("failed to marshal", err.Error())
+	} else {
+		status := s.redis.Set(ctx, rkey, string(cachestr), 24*time.Hour)
+		if status.Err() != nil {
+			log.Println("caching failed:", status.Err().Error())
+		}
 	}
 	return response, nil
 }
