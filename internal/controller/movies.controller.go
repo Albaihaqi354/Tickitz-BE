@@ -39,6 +39,14 @@ func (ctrl MovieController) GetUpcomingMovies(c *gin.Context) {
 		})
 		return
 	}
+	if len(data) == 0 {
+		c.JSON(http.StatusNotFound, dto.Response{
+			Msg:     "Data not found",
+			Success: true,
+			Data:    nil,
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, dto.Response{
 		Msg:     "Get Upcoming Movies Success",
@@ -67,6 +75,13 @@ func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
 		})
 		return
 	}
+	if len(data) == 0 {
+		c.JSON(http.StatusFound, dto.Response{
+			Msg:     "data not found",
+			Success: true,
+			Data:    nil,
+		})
+	}
 
 	c.JSON(http.StatusOK, dto.Response{
 		Msg:     "Get Upcoming Movies Success",
@@ -87,7 +102,7 @@ func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
 // @Success      200       {object}  dto.Response
 // @Failure      400       {object}  dto.Response
 // @Failure      500       {object}  dto.Response
-// @Router       /movies/filter [get]
+// @Router       /movies [get]
 func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 	var search *string
 	if s := c.Query("search"); s != "" {
@@ -122,6 +137,15 @@ func (ctrl MovieController) GetMovieWithFilter(c *gin.Context) {
 		})
 		return
 	}
+	if len(data) == 0 {
+		c.JSON(http.StatusNotFound, dto.Response{
+			Msg:     "Data not found",
+			Success: true,
+			Data:    nil,
+			Meta:    meta,
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, dto.Response{
 		Msg:     "Get Filter Movie Success",
@@ -152,6 +176,14 @@ func (ctr MovieController) GetMovieDetail(c *gin.Context) {
 			Success: false,
 			Error:   err.Error(),
 			Data:    []any{},
+		})
+		return
+	}
+	if len(data) == 0 {
+		c.JSON(http.StatusNotFound, dto.Response{
+			Msg:     "Data not found",
+			Success: true,
+			Data:    nil,
 		})
 		return
 	}

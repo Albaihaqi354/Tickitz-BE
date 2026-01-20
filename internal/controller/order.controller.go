@@ -67,6 +67,13 @@ func (ctrl OrderController) GetSchedules(c *gin.Context) {
 		})
 		return
 	}
+	if len(data) == 0 {
+		c.JSON(http.StatusNotFound, dto.Response{
+			Msg:     "data not found",
+			Success: true,
+			Data:    nil,
+		})
+	}
 
 	c.JSON(http.StatusOK, dto.Response{
 		Msg:     "Get Schedules Success",
@@ -106,6 +113,14 @@ func (ctrl OrderController) GetSeats(c *gin.Context) {
 			Success: false,
 			Error:   err.Error(),
 			Data:    []any{},
+		})
+		return
+	}
+	if len(data) == 0 {
+		c.JSON(http.StatusNotFound, dto.Response{
+			Msg:     "Data not found",
+			Success: true,
+			Data:    nil,
 		})
 		return
 	}
