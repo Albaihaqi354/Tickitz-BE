@@ -114,10 +114,11 @@ func (u UserService) UpdateProfile(ctx context.Context, userId int, req dto.Upda
 	}
 
 	response := dto.UpdateProfileResponse{
-		Id:          updateProfile.Id,
-		FirstName:   updateProfile.FirstName,
-		LastName:    updateProfile.LastName,
-		PhoneNumber: updateProfile.PhoneNumber,
+		Id:           updateProfile.Id,
+		FirstName:    updateProfile.FirstName,
+		LastName:     updateProfile.LastName,
+		PhoneNumber:  updateProfile.PhoneNumber,
+		ProfileImage: updateProfile.ProfileImage,
 	}
 
 	return response, nil

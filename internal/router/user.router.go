@@ -7,15 +7,16 @@ import (
 	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
-func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool) {
+func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)
 
 	g := app.Group("/user")
-	g.Use(middleware.VerifyToken)
+	g.Use(middleware.VerifyToken(rdb))
 	g.Use(middleware.CheckRole("user"))
 	{
 		g.GET("/profile", userController.GetProfile)
