@@ -73,6 +73,7 @@ func (ctrl OrderController) GetSchedules(c *gin.Context) {
 			Success: true,
 			Data:    nil,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, dto.Response{

@@ -42,6 +42,9 @@ func (s MovieService) GetUpcomingMovies(ctx context.Context) ([]dto.GetUpcomingM
 			}
 		}
 	}
+	if rsc.Err() == redis.Nil {
+		log.Println("movie cache miss")
+	}
 
 	movies, err := s.movieRepository.GetUpcomingMovie(ctx)
 	if err != nil {

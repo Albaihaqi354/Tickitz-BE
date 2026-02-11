@@ -77,3 +77,25 @@ func (a AdminService) UpdateMovieAdmin(ctx context.Context, id int, req dto.Upda
 
 	return response, nil
 }
+
+func (a AdminService) CreateMovieAdmin(ctx context.Context, req dto.CreateMovieRequest) (dto.CreateMovieResponse, error) {
+	newMovie, err := a.adminRepository.CreateMovieAdmin(ctx, req)
+	if err != nil {
+		log.Println("Service Error:", err.Error())
+		return dto.CreateMovieResponse{}, err
+	}
+
+	response := dto.CreateMovieResponse{
+		Id:              newMovie.Id,
+		Title:           newMovie.Title,
+		Synopsis:        newMovie.Synopsis,
+		Duration:        newMovie.Duration,
+		ReleaseDate:     newMovie.ReleaseDate,
+		DirectorId:      newMovie.DirectorId,
+		PosterUrl:       newMovie.PosterUrl,
+		BackdropUrl:     newMovie.BackdropUrl,
+		PopularityScore: newMovie.PopularityScore,
+	}
+
+	return response, nil
+}

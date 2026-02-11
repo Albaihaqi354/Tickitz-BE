@@ -23,9 +23,9 @@ func (m MovieRepository) GetUpcomingMovie(ctx context.Context) ([]model.MovieDet
 		SELECT 
 			m.id, 
 			m.title, 
-			m.poster_url, 
+			COALESCE(m.poster_url, '') AS poster_url, 
 			m.release_date, 
-			STRING_AGG(DISTINCT g.name, ', ') AS genres
+			COALESCE(STRING_AGG(DISTINCT g.name, ', '), '') AS genres
 		FROM movies m 
 		LEFT JOIN movie_genres mg ON m.id = mg.movie_id 
 		LEFT JOIN genres g ON mg.genre_id = g.id 
@@ -63,9 +63,9 @@ func (m MovieRepository) GetPopularMovie(ctx context.Context) ([]model.MovieDeta
 		SELECT 
 			m.id,
 			m.title,
-			m.poster_url,
-			m.popularity_score,
-			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
+			COALESCE(m.poster_url, '') AS poster_url,
+			COALESCE(m.popularity_score, 0) AS popularity_score,
+			COALESCE(STRING_AGG(DISTINCT g.name, ', '), '') AS genre_name
 		FROM movies m
 		LEFT JOIN movie_genres mg ON m.id = mg.movie_id
 		LEFT JOIN genres g ON mg.genre_id = g.id
@@ -102,8 +102,8 @@ func (m MovieRepository) GetMovieWithFilter(ctx context.Context, search *string,
 		SELECT 
 			m.id,
 			m.title,
-			m.poster_url,
-			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
+			COALESCE(m.poster_url, '') AS poster_url,
+			COALESCE(STRING_AGG(DISTINCT g.name, ', '), '') AS genre_name
 		FROM movies m
 		LEFT JOIN movie_genres mg ON m.id = mg.movie_id
 		LEFT JOIN genres g ON mg.genre_id = g.id
@@ -172,14 +172,14 @@ func (m MovieRepository) GetMovieDetail(ctx context.Context, movieId int) ([]mod
 		SELECT
 			m.id,
 			m.title,
-			m.synopsis,
-			m.duration,
+			COALESCE(m.synopsis, '') AS synopsis,
+			COALESCE(m.duration, 0) AS duration,
 			m.release_date,
-			d.name AS director,
-			STRING_AGG(DISTINCT a.name, ', ') AS "cast",
-			m.poster_url,
-			m.backdrop_url,
-			STRING_AGG(DISTINCT g.name, ', ') AS genre_name
+			COALESCE(d.name, '') AS director,
+			COALESCE(STRING_AGG(DISTINCT a.name, ', '), '') AS "cast",
+			COALESCE(m.poster_url, '') AS poster_url,
+			COALESCE(m.backdrop_url, '') AS backdrop_url,
+			COALESCE(STRING_AGG(DISTINCT g.name, ', '), '') AS genre_name
 		FROM movies m
 		LEFT JOIN directors d ON m.director_id = d.id
 		LEFT JOIN movie_casts mc ON m.id = mc.movie_id

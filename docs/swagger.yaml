@@ -162,25 +162,6 @@ definitions:
       status:
         type: string
     type: object
-  dto.UpdateMovieRequest:
-    properties:
-      backdrop_url:
-        type: string
-      director_id:
-        type: integer
-      duration:
-        type: integer
-      popularity_score:
-        type: number
-      poster_url:
-        type: string
-      release_date:
-        type: string
-      synopsis:
-        type: string
-      title:
-        type: string
-    type: object
   dto.UpdateOrderRequest:
     properties:
       payment_status:
@@ -218,7 +199,7 @@ info:
   title: Tickitz Back End
   version: "1.0"
 paths:
-  /admin/movies:
+  /admin:
     get:
       consumes:
       - application/json
@@ -241,6 +222,79 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all movies
+      tags:
+      - admin
+  /admin/movies:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new movie (Requires admin token)
+      parameters:
+      - description: Movie Title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Movie Synopsis
+        in: formData
+        name: synopsis
+        required: true
+        type: string
+      - description: Movie Duration
+        in: formData
+        name: duration
+        required: true
+        type: integer
+      - description: Movie Release Date (YYYY-MM-DD)
+        in: formData
+        name: release_date
+        required: true
+        type: string
+      - description: Director ID
+        in: formData
+        name: director_id
+        type: integer
+      - description: Poster Image
+        in: formData
+        name: poster
+        type: file
+      - description: Backdrop Image
+        in: formData
+        name: backdrop
+        type: file
+      - collectionFormat: csv
+        description: Genre IDs
+        in: formData
+        items:
+          type: integer
+        name: genre_ids
+        type: array
+      - description: Popularity Score
+        in: formData
+        name: popularity_score
+        type: number
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a movie
       tags:
       - admin
   /admin/movies/{id}:
@@ -280,7 +334,7 @@ paths:
       - admin
     patch:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Update movie details (Requires admin token)
       parameters:
       - description: Movie ID
@@ -288,12 +342,38 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Movie Update Body
-        in: body
-        name: movie
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateMovieRequest'
+      - description: Movie Title
+        in: formData
+        name: title
+        type: string
+      - description: Movie Synopsis
+        in: formData
+        name: synopsis
+        type: string
+      - description: Movie Duration
+        in: formData
+        name: duration
+        type: integer
+      - description: Movie Release Date (YYYY-MM-DD)
+        in: formData
+        name: release_date
+        type: string
+      - description: Director ID
+        in: formData
+        name: director_id
+        type: integer
+      - description: Poster Image
+        in: formData
+        name: poster
+        type: file
+      - description: Backdrop Image
+        in: formData
+        name: backdrop
+        type: file
+      - description: Popularity Score
+        in: formData
+        name: popularity_score
+        type: number
       produces:
       - application/json
       responses:
@@ -351,6 +431,27 @@ paths:
           schema:
             $ref: '#/definitions/dto.Response'
       summary: User login
+      tags:
+      - auth
+  /auth/logout:
+    delete:
+      consumes:
+      - application/json
+      description: Invalidate JWT token by removing it from whitelist
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: User logout
       tags:
       - auth
   /auth/register:
@@ -649,6 +750,36 @@ paths:
       summary: Get seats for a schedule
       tags:
       - orders
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Get current user profile information (Requires user token)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetProfile'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - user
   /user/history:
     get:
       consumes:
@@ -718,35 +849,6 @@ paths:
       tags:
       - user
   /user/profile:
-    get:
-      consumes:
-      - application/json
-      description: Get current user profile information (Requires user token)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.GetProfile'
-              type: object
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dto.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user profile
-      tags:
-      - user
     patch:
       consumes:
       - multipart/form-data

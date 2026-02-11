@@ -5,23 +5,27 @@ import (
 	"log"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
 	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
 )
 
 type OrderService struct {
-	orderRepository *repository.OrderRepository
+	orderRepository repository.OrderRepo
+	db              *pgxpool.Pool
 }
 
-func NewOrderService(orderRepository *repository.OrderRepository) *OrderService {
+func NewOrderService(orderRepository repository.OrderRepo, db *pgxpool.Pool) *OrderService {
 	return &OrderService{
 		orderRepository: orderRepository,
+		db:              db,
 	}
 }
 
 func (o OrderService) GetSchedules(ctx context.Context, movieId int, showDate *string, city *string) ([]dto.GetSchedules, error) {
-	schedules, err := o.orderRepository.GetSchedules(ctx, movieId, showDate, city)
+	schedules, err := o.orderRepository.GetSchedules(ctx, o.db, movieId, showDate, city)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
 		return nil, err
@@ -45,7 +49,7 @@ func (o OrderService) GetSchedules(ctx context.Context, movieId int, showDate *s
 }
 
 func (o OrderService) GetSeatsByScheduleID(ctx context.Context, scheduleId int) ([]dto.SeatResponse, error) {
-	seats, err := o.orderRepository.GetSeatsByScheduleID(ctx, scheduleId)
+	seats, err := o.orderRepository.GetSeatsByScheduleID(ctx, o.db, scheduleId)
 	if err != nil {
 		log.Println("Service Error:", err.Error())
 		return nil, err
@@ -65,7 +69,7 @@ func (o OrderService) GetSeatsByScheduleID(ctx context.Context, scheduleId int) 
 }
 
 func (o OrderService) CreateOrder(ctx context.Context, userId int, req dto.CreateOrderRequest) (int, string, time.Time, error) {
-	price, err := o.orderRepository.GetPriceFromSchedule(ctx, req.ScheduleId)
+	price, err := o.orderRepository.GetPriceFromSchedule(ctx, o.db, req.ScheduleId)
 	if err != nil {
 		log.Println("Service Error (GetPrice):", err.Error())
 		return 0, "", time.Time{}, err
@@ -80,16 +84,37 @@ func (o OrderService) CreateOrder(ctx context.Context, userId int, req dto.Creat
 		PaymentStatus: "pending",
 	}
 
-	id, bookingCode, createdAt, err := o.orderRepository.CreateOrder(ctx, order, req.Seats)
+	tx, err := o.db.Begin(ctx)
 	if err != nil {
-		log.Println("Service Error (CreateOrder):", err.Error())
+		log.Println("Service Error (Begin Tx):", err.Error())
+		return 0, "", time.Time{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	id, bookingCode, createdAt, err := o.orderRepository.InsertOrder(ctx, tx, order)
+	if err != nil {
+		log.Println("Service Error (InsertOrder):", err.Error())
+		return 0, "", time.Time{}, err
+	}
+
+	for _, seatId := range req.Seats {
+		err := o.orderRepository.InsertOrderDetail(ctx, tx, id, seatId)
+		if err != nil {
+			log.Println("Service Error (InsertOrderDetail):", err.Error())
+			return 0, "", time.Time{}, err
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Println("Service Error (Commit Tx):", err.Error())
 		return 0, "", time.Time{}, err
 	}
 
 	return id, bookingCode, createdAt, nil
 }
+
 func (o OrderService) UpdatePaymentStatus(ctx context.Context, orderId int, status string) error {
-	err := o.orderRepository.UpdatePaymentStatus(ctx, orderId, status)
+	err := o.orderRepository.UpdatePaymentStatus(ctx, o.db, orderId, status)
 	if err != nil {
 		log.Println("Service Error (UpdatePaymentStatus):", err.Error())
 		return err

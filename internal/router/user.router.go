@@ -19,7 +19,7 @@ func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	g.Use(middleware.VerifyToken(rdb))
 	g.Use(middleware.CheckRole("user"))
 	{
-		g.GET("/profile", userController.GetProfile)
+		g.GET("/", userController.GetProfile)
 		g.GET("/history", userController.GetHistory)
 		g.PATCH("/password", userController.UpdatePassword)
 		g.PATCH("/profile", userController.UpdateProfile)

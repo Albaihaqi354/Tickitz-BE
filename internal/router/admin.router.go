@@ -7,18 +7,20 @@ import (
 	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
-func RegisterAdminRouter(app *gin.Engine, db *pgxpool.Pool) {
+func RegisterAdminRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	adminRepository := repository.NewAdminRepository(db)
 	adminService := service.NewAdminService(adminRepository)
 	adminController := controller.NewAdminController(adminService)
 
 	g := app.Group("/admin")
-	g.Use(middleware.VerifyToken)
+	g.Use(middleware.VerifyToken(rdb))
 	g.Use(middleware.CheckRole("admin"))
 	{
-		g.GET("/movies", adminController.GetAllMovieAdmin)
+		g.GET("/", adminController.GetAllMovieAdmin)
+		g.POST("/movies", adminController.CreateMovieAdmin)
 		g.DELETE("/movies/:id", adminController.DeleteMovieAdmin)
 		g.PATCH("/movies/:id", adminController.UpdateMovieAdmin)
 	}

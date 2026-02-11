@@ -11,10 +11,12 @@ import (
 
 func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	app.Static("/profile", "./public/profile")
+	app.Static("/movie", "./public/movie")
 
-	RegisterAuthRouter(app, db)
+	RegisterAuthRouter(app, db, rdb)
 	RegisterMovieRouter(app, db, rdb)
-	RegisterAdminRouter(app, db)
-	RegisterUserRouter(app, db)
-	RegisterOrderRouter(app, db)
+	RegisterAdminRouter(app, db, rdb)
+	RegisterUserRouter(app, db, rdb)
+	RegisterOrderRouter(app, db, rdb)
 }

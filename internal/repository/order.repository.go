@@ -6,20 +6,32 @@ import (
 	"time"
 
 	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type OrderRepository struct {
-	db *pgxpool.Pool
+type DBTX interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
 }
 
-func NewOrdersRepository(db *pgxpool.Pool) *OrderRepository {
-	return &OrderRepository{
-		db: db,
-	}
+type OrderRepo interface {
+	GetSchedules(ctx context.Context, db DBTX, movieId int, showDate *string, city *string) ([]model.GetSchedules, error)
+	InsertOrder(ctx context.Context, db DBTX, order model.Order) (int, string, time.Time, error)
+	InsertOrderDetail(ctx context.Context, db DBTX, orderId int, seatId int) error
+	GetSeatsByScheduleID(ctx context.Context, db DBTX, scheduleId int) ([]model.Seat, error)
+	GetPriceFromSchedule(ctx context.Context, db DBTX, scheduleId int) (int, error)
+	UpdatePaymentStatus(ctx context.Context, db DBTX, orderId int, status string) error
 }
 
-func (o OrderRepository) GetSchedules(ctx context.Context, movieId int, showDate *string, city *string) ([]model.GetSchedules, error) {
+type OrderRepository struct{}
+
+func NewOrdersRepository() *OrderRepository {
+	return &OrderRepository{}
+}
+
+func (o OrderRepository) GetSchedules(ctx context.Context, db DBTX, movieId int, showDate *string, city *string) ([]model.GetSchedules, error) {
 	sqlStr := `
 		SELECT 
 			s.id,
@@ -40,7 +52,7 @@ func (o OrderRepository) GetSchedules(ctx context.Context, movieId int, showDate
 		ORDER BY s.show_date, s.show_time;
 	`
 
-	rows, err := o.db.Query(ctx, sqlStr, movieId, showDate, city)
+	rows, err := db.Query(ctx, sqlStr, movieId, showDate, city)
 	if err != nil {
 		log.Println("Query error:", err.Error())
 		return nil, err
@@ -70,13 +82,7 @@ func (o OrderRepository) GetSchedules(ctx context.Context, movieId int, showDate
 	return schedules, nil
 }
 
-func (o OrderRepository) CreateOrder(ctx context.Context, order model.Order, seats []int) (int, string, time.Time, error) {
-	tx, err := o.db.Begin(ctx)
-	if err != nil {
-		return 0, "", time.Time{}, err
-	}
-	defer tx.Rollback(ctx)
-
+func (o OrderRepository) InsertOrder(ctx context.Context, db DBTX, order model.Order) (int, string, time.Time, error) {
 	sqlOrder := `
 		INSERT INTO orders (user_id, schedule_id, total_price, payment_status, booking_code)
 		VALUES ($1, $2, $3, $4, md5(random()::text))
@@ -86,30 +92,27 @@ func (o OrderRepository) CreateOrder(ctx context.Context, order model.Order, sea
 	var bookingCode string
 	var createdAt time.Time
 
-	err = tx.QueryRow(ctx, sqlOrder, order.UserId, order.ScheduleId, order.TotalPrice, order.PaymentStatus).Scan(&id, &bookingCode, &createdAt)
+	err := db.QueryRow(ctx, sqlOrder, order.UserId, order.ScheduleId, order.TotalPrice, order.PaymentStatus).Scan(&id, &bookingCode, &createdAt)
 	if err != nil {
-		log.Println("CreateOrder Error:", err.Error())
-		return 0, "", time.Time{}, err
-	}
-
-	sqlOrderDetail := `INSERT INTO order_details (order_id, seat_id) VALUES ($1, $2)`
-	for _, seatId := range seats {
-		_, err := tx.Exec(ctx, sqlOrderDetail, id, seatId)
-		if err != nil {
-			log.Println("CreateOrderDetail Error:", err.Error())
-			return 0, "", time.Time{}, err
-		}
-	}
-
-	err = tx.Commit(ctx)
-	if err != nil {
+		log.Println("InsertOrder Error:", err.Error())
 		return 0, "", time.Time{}, err
 	}
 
 	return id, bookingCode, createdAt, nil
 }
 
-func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, scheduleId int) ([]model.Seat, error) {
+func (o OrderRepository) InsertOrderDetail(ctx context.Context, db DBTX, orderId int, seatId int) error {
+	sqlOrderDetail := `INSERT INTO order_details (order_id, seat_id) VALUES ($1, $2)`
+	_, err := db.Exec(ctx, sqlOrderDetail, orderId, seatId)
+	if err != nil {
+		log.Println("InsertOrderDetail Error:", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, db DBTX, scheduleId int) ([]model.Seat, error) {
+	// ... (sqlStr omitted)
 	sqlStr := `
 		SELECT 
 			se.id AS seat_id,
@@ -134,7 +137,7 @@ func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, scheduleId in
 		ORDER BY se.row_letter, se.seat_number;
 	`
 
-	rows, err := o.db.Query(ctx, sqlStr, scheduleId)
+	rows, err := db.Query(ctx, sqlStr, scheduleId)
 	if err != nil {
 		return nil, err
 	}
@@ -152,16 +155,16 @@ func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, scheduleId in
 	return seats, nil
 }
 
-func (o OrderRepository) GetPriceFromSchedule(ctx context.Context, scheduleId int) (int, error) {
+func (o OrderRepository) GetPriceFromSchedule(ctx context.Context, db DBTX, scheduleId int) (int, error) {
 	sqlStr := "SELECT price FROM schedules WHERE id = $1"
 	var price int
-	err := o.db.QueryRow(ctx, sqlStr, scheduleId).Scan(&price)
+	err := db.QueryRow(ctx, sqlStr, scheduleId).Scan(&price)
 	return price, err
 }
 
-func (o OrderRepository) UpdatePaymentStatus(ctx context.Context, orderId int, status string) error {
+func (o OrderRepository) UpdatePaymentStatus(ctx context.Context, db DBTX, orderId int, status string) error {
 	sqlStr := "UPDATE orders SET payment_status = $1 WHERE id = $2"
-	_, err := o.db.Exec(ctx, sqlStr, status, orderId)
+	_, err := db.Exec(ctx, sqlStr, status, orderId)
 	if err != nil {
 		log.Println("UpdatePaymentStatus Error:", err.Error())
 		return err

@@ -40,5 +40,5 @@ func main() {
 
 	app.Use(middleware.CORSMiddleware)
 	router.Init(app, db, rdb)
-	app.Run("localhost:5000")
+	app.Run(":5000")
 }

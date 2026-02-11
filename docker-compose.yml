@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: be
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - .env.docker
+    networks:
+      - backend
+    volumes:
+      - ./public:/app/public
+
+  redis:
+    image: redis:7-alpine
+    container_name: rds
+    command: redis-server --requirepass ${RDS_PASS}
+    networks:
+      - backend
+    volumes:
+      - redis:/data
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: db
+    env_file: .env.docker
+    networks:
+      - backend
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+networks:
+  backend:
+
+volumes:
+  pg-data:
+    external: true
+  redis:
+    external: true

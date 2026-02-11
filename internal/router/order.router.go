@@ -7,11 +7,12 @@ import (
 	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
-func RegisterOrderRouter(app *gin.Engine, db *pgxpool.Pool) {
-	orderRepository := repository.NewOrdersRepository(db)
-	orderService := service.NewOrderService(orderRepository)
+func RegisterOrderRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+	orderRepository := repository.NewOrdersRepository()
+	orderService := service.NewOrderService(orderRepository, db)
 	orderController := controller.NewOrderController(orderService)
 
 	g := app.Group("/orders")
@@ -19,7 +20,7 @@ func RegisterOrderRouter(app *gin.Engine, db *pgxpool.Pool) {
 		g.GET("/schedules/:id", orderController.GetSchedules)
 		g.GET("/seats/:id", orderController.GetSeats)
 
-		g.POST("/", middleware.VerifyToken, middleware.CheckRole("user"), orderController.CreateOrder)
-		g.PATCH("/:id", middleware.VerifyToken, middleware.CheckRole("user"), orderController.UpdatePaymentStatus)
+		g.POST("/", middleware.VerifyToken(rdb), middleware.CheckRole("user"), orderController.CreateOrder)
+		g.PATCH("/:id", middleware.VerifyToken(rdb), middleware.CheckRole("user"), orderController.UpdatePaymentStatus)
 	}
 }

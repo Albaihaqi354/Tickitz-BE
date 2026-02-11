@@ -36,7 +36,7 @@ func NewUserController(userService *service.UserService) *UserController {
 // @Success      200  {object}  dto.Response{data=dto.GetProfile}
 // @Failure      401  {object}  dto.Response
 // @Failure      500  {object}  dto.Response
-// @Router       /user/profile [get]
+// @Router       /user [get]
 func (u UserController) GetProfile(c *gin.Context) {
 	userId, exist := c.Get("user_id")
 	if !exist {

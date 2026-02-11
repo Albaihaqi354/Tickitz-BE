@@ -3,40 +3,48 @@ package middleware
 import (
 	"log"
 	"net/http"
-	"slices"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CORSMiddleware(c *gin.Context) {
-	defer c.Next()
-
-	whiteListOrigin := []string{"http://localhost:5000", "http://localhost:5050"}
 	origin := c.GetHeader("Origin")
+	whiteListOrigin := []string{
+		"http://localhost:5000",
+		"http://localhost:5050",
+		"http://localhost:5173",
+		"http://localhost:3000",
+		"http://192.168.50.121:3000",
+	}
 
-	if slices.Contains(whiteListOrigin, origin) {
-		c.Header("Access-Control-Allow-Origin", origin)
+	isAllowed := false
+	if origin == "" {
+		isAllowed = true
+	} else {
+		for _, o := range whiteListOrigin {
+			if o == origin {
+				isAllowed = true
+				break
+			}
+		}
+	}
+
+	if isAllowed {
+		if origin != "" {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
 		c.Header("Access-Control-Allow-Credentials", "true")
-
-		allowedHeaders := []string{
-			"Content-Type", "Authorization",
-		}
-		c.Header("Access-Control-Allow-Headers", strings.Join(allowedHeaders, ", "))
-
-		allowedMethods := []string{
-			http.MethodPost, http.MethodOptions, http.MethodGet, http.MethodPut,
-			http.MethodDelete, http.MethodPatch,
-		}
-		c.Header("Access-Control-Allow-Methods", strings.Join(allowedMethods, ", "))
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
 
 		if c.Request.Method == http.MethodOptions {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
-	} else if origin != "" {
-		log.Printf("Origin is not in the whitelist: %s", origin)
-		c.AbortWithStatus(http.StatusNotFound)
-		return
+
+		c.Next()
+	} else {
+		log.Printf("CORS Blocked: Unknown Origin: %s", origin)
+		c.AbortWithStatus(http.StatusForbidden)
 	}
 }

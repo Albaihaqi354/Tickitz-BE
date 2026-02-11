@@ -1,6 +1,7 @@
 go.mod
 go.sum
 .env
+.env.docker
 .vscode
 
 tmp

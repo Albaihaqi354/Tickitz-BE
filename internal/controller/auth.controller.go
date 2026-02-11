@@ -109,3 +109,42 @@ func (a AuthController) Login(c *gin.Context) {
 		Data:    []any{data},
 	})
 }
+
+// Logout godoc
+// @Summary      User logout
+// @Description  Invalidate JWT token by removing it from whitelist
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  dto.Response
+// @Failure      401  {object}  dto.Response
+// @Router       /auth/logout [delete]
+func (a AuthController) Logout(c *gin.Context) {
+	bearerToken := c.GetHeader("Authorization")
+	parts := strings.Split(bearerToken, " ")
+	if len(parts) < 2 {
+		c.JSON(http.StatusUnauthorized, dto.Response{
+			Msg:     "Unauthorized",
+			Success: false,
+			Error:   "Invalid token format",
+		})
+		return
+	}
+	token := parts[1]
+
+	err := a.authService.Logout(c.Request.Context(), token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Response{
+			Msg:     "Internal Server Error",
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Msg:     "Logout Success",
+		Success: true,
+	})
+}

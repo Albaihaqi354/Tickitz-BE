@@ -77,11 +77,12 @@ func (ctrl MovieController) GetPopularMovie(c *gin.Context) {
 		return
 	}
 	if len(data) == 0 {
-		c.JSON(http.StatusFound, dto.Response{
+		c.JSON(http.StatusNotFound, dto.Response{
 			Msg:     "data not found",
 			Success: true,
 			Data:    nil,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, dto.Response{

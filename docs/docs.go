@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/movies": {
+        "/admin": {
             "get": {
                 "security": [
                     {
@@ -36,6 +36,116 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/movies": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new movie (Requires admin token)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create a movie",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Movie Title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Movie Synopsis",
+                        "name": "synopsis",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Movie Duration",
+                        "name": "duration",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Movie Release Date (YYYY-MM-DD)",
+                        "name": "release_date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Director ID",
+                        "name": "director_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Poster Image",
+                        "name": "poster",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Backdrop Image",
+                        "name": "backdrop",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Genre IDs",
+                        "name": "genre_ids",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Popularity Score",
+                        "name": "popularity_score",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/dto.Response"
                         }
@@ -117,7 +227,7 @@ const docTemplate = `{
                 ],
                 "description": "Update movie details (Requires admin token)",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -135,13 +245,52 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Movie Update Body",
-                        "name": "movie",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateMovieRequest"
-                        }
+                        "type": "string",
+                        "description": "Movie Title",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Movie Synopsis",
+                        "name": "synopsis",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Movie Duration",
+                        "name": "duration",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Movie Release Date (YYYY-MM-DD)",
+                        "name": "release_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Director ID",
+                        "name": "director_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Poster Image",
+                        "name": "poster",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Backdrop Image",
+                        "name": "backdrop",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Popularity Score",
+                        "name": "popularity_score",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -217,6 +366,40 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Invalidate JWT token by removing it from whitelist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.Response"
                         }
@@ -694,6 +877,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get current user profile information (Requires user token)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/history": {
             "get": {
                 "security": [
@@ -807,56 +1042,6 @@ const docTemplate = `{
             }
         },
         "/user/profile": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get current user profile information (Requires user token)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get user profile",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.GetProfile"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dto.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.Response"
-                        }
-                    }
-                }
-            },
             "patch": {
                 "security": [
                     {
@@ -1184,35 +1369,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UpdateMovieRequest": {
-            "type": "object",
-            "properties": {
-                "backdrop_url": {
-                    "type": "string"
-                },
-                "director_id": {
-                    "type": "integer"
-                },
-                "duration": {
-                    "type": "integer"
-                },
-                "popularity_score": {
-                    "type": "number"
-                },
-                "poster_url": {
-                    "type": "string"
-                },
-                "release_date": {
-                    "type": "string"
-                },
-                "synopsis": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }

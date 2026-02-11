@@ -142,3 +142,73 @@ func (a AdminRepository) UpdateMovieAdmin(ctx context.Context, id int, req dto.U
 
 	return m, nil
 }
+
+func (a AdminRepository) CreateMovieAdmin(ctx context.Context, req dto.CreateMovieRequest) (model.Movie, error) {
+	tx, err := a.db.Begin(ctx)
+	if err != nil {
+		log.Println("Transaction Begin Error:", err.Error())
+		return model.Movie{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	sqlStr := `
+		INSERT INTO movies (
+			title, 
+			synopsis, 
+			duration, 
+			release_date, 
+			director_id, 
+			poster_url, 
+			backdrop_url, 
+			popularity_score, 
+			created_at, 
+			updated_at
+		) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+		RETURNING id, title, synopsis, duration, release_date, director_id, poster_url, backdrop_url, popularity_score;`
+
+	var m model.Movie
+	err = tx.QueryRow(ctx, sqlStr,
+		req.Title,
+		req.Synopsis,
+		req.Duration,
+		req.ReleaseDate,
+		req.DirectorId,
+		req.PosterUrl,
+		req.BackdropUrl,
+		req.PopularityScore,
+	).Scan(
+		&m.Id,
+		&m.Title,
+		&m.Synopsis,
+		&m.Duration,
+		&m.ReleaseDate,
+		&m.DirectorId,
+		&m.PosterUrl,
+		&m.BackdropUrl,
+		&m.PopularityScore,
+	)
+
+	if err != nil {
+		log.Println("Insert Movie Error:", err.Error())
+		return model.Movie{}, err
+	}
+
+	if len(req.Genres) > 0 {
+		for _, genreId := range req.Genres {
+			genreSql := `INSERT INTO movie_genres (movie_id, genre_id) VALUES ($1, $2)`
+			_, err := tx.Exec(ctx, genreSql, m.Id, genreId)
+			if err != nil {
+				log.Println("Insert Genre Error:", err.Error())
+				return model.Movie{}, err
+			}
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Println("Transaction Commit Error:", err.Error())
+		return model.Movie{}, err
+	}
+
+	return m, nil
+}

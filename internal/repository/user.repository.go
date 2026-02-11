@@ -150,6 +150,7 @@ func (u UserRepository) UpdateProfile(ctx context.Context, userId int, req dto.U
 
 	var m model.User
 	err := u.db.QueryRow(ctx, sqlStr,
+		// ... rest unchanged
 		req.FirstName,
 		req.LastName,
 		req.PhoneNumber,
