@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/albaihaqi354/tickitz-be:latest
     container_name: be
     ports:
       - "5000:5000"
