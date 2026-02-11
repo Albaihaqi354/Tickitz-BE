@@ -112,7 +112,6 @@ func (o OrderRepository) InsertOrderDetail(ctx context.Context, db DBTX, orderId
 }
 
 func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, db DBTX, scheduleId int) ([]model.Seat, error) {
-	// ... (sqlStr omitted)
 	sqlStr := `
 		SELECT 
 			se.id AS seat_id,

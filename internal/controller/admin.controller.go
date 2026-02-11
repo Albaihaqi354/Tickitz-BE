@@ -148,7 +148,6 @@ func (ctrl AdminController) UpdateMovieAdmin(c *gin.Context) {
 		return
 	}
 
-	// Handle Poster Upload
 	if req.Poster != nil {
 		ext := path.Ext(req.Poster.Filename)
 		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
@@ -177,7 +176,6 @@ func (ctrl AdminController) UpdateMovieAdmin(c *gin.Context) {
 		req.PosterUrl = &posterPath
 	}
 
-	// Handle Backdrop Upload
 	if req.Backdrop != nil {
 		ext := path.Ext(req.Backdrop.Filename)
 		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
@@ -257,7 +255,6 @@ func (ctrl AdminController) CreateMovieAdmin(c *gin.Context) {
 		return
 	}
 
-	// Parse GenreIds string to []int
 	if req.GenreIds != "" {
 		genreIdsStr := strings.Split(req.GenreIds, ",")
 		for _, idStr := range genreIdsStr {
@@ -275,7 +272,6 @@ func (ctrl AdminController) CreateMovieAdmin(c *gin.Context) {
 		}
 	}
 
-	// Handle Poster Upload
 	if req.Poster != nil {
 		ext := path.Ext(req.Poster.Filename)
 		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
@@ -304,7 +300,6 @@ func (ctrl AdminController) CreateMovieAdmin(c *gin.Context) {
 		req.PosterUrl = &posterPath
 	}
 
-	// Handle Backdrop Upload
 	if req.Backdrop != nil {
 		ext := path.Ext(req.Backdrop.Filename)
 		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
