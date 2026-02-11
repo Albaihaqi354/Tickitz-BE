@@ -30,7 +30,7 @@ func NewAdminController(adminService *service.AdminService) *AdminController {
 
 // GetAllMovieAdmin godoc
 // @Summary      Get all movies
-// @Description  Get list of all movies for admin management
+// @Description  Get list of all movies for admin
 // @Tags         admin
 // @Accept       json
 // @Produce      json
