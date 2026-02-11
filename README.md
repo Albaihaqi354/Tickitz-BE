@@ -1,6 +1,6 @@
 # Tickitz Backend API
 
-Tickitz adalah platform pemesanan tiket film online yang memungkinkan pengguna untuk mencari jadwal film, kursi yang tersedia, dan melakukan pemesanan tiket dengan mudah. Repository ini berisi kode sumber untuk layanan backend built-in menggunakan Go.
+Tickitz adalah platform pemesanan tiket film online yang memungkinkan pengguna untuk mencari jadwal film, kursi yang tersedia, dan melakukan pemesanan tiket dengan mudah. Repository ini berisi kode sumber untuk layanan backend built-in menggunakan Golang.
 
 ## Teknologi yang Digunakan
 
