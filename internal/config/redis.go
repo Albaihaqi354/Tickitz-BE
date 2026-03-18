@@ -9,6 +9,16 @@ import (
 )
 
 func InitRedis() *redis.Client {
+	// Jika RDS_URL tersedia, gunakan ParseURL (Sangat disarankan untuk Upstash/TLS)
+	rdsURL := os.Getenv("RDS_URL")
+	if rdsURL != "" {
+		opt, err := redis.ParseURL(rdsURL)
+		if err == nil {
+			return redis.NewClient(opt)
+		}
+	}
+
+	// Fallback ke manual config jika RDS_URL tidak ada
 	user := os.Getenv("RDS_USER")
 	pass := os.Getenv("RDS_PASS")
 	host := os.Getenv("RDS_HOST")
