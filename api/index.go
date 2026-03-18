@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/config"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/middleware"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/router"
+	"github.com/Albaihaqi354/Tickitz-BE/core/config"
+	"github.com/Albaihaqi354/Tickitz-BE/core/middleware"
+	"github.com/Albaihaqi354/Tickitz-BE/core/router"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/err"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/service"
+	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
+	"github.com/Albaihaqi354/Tickitz-BE/core/err"
+	"github.com/Albaihaqi354/Tickitz-BE/core/service"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

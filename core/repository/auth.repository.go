@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
+	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
+	"github.com/Albaihaqi354/Tickitz-BE/core/model"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )

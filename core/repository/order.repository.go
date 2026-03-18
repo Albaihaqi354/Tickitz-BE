@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/model"
+	"github.com/Albaihaqi354/Tickitz-BE/core/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )

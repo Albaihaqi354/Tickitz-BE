@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
+	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
+	"github.com/Albaihaqi354/Tickitz-BE/core/repository"
 )
 
 type AdminService struct {

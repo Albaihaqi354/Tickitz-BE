@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Albaihaqi354/Tickitz-BE/internal/dto"
-	"github.com/Albaihaqi354/Tickitz-BE/internal/repository"
+	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
+	"github.com/Albaihaqi354/Tickitz-BE/core/repository"
 	"github.com/Albaihaqi354/Tickitz-BE/pkg"
 	"github.com/redis/go-redis/v9"
 )
