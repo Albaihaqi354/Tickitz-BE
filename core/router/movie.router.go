@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterMovieRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+func RegisterMovieRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 	movieRepository := repository.NewMoviesRepository(db)
 	movieService := service.NewMovieService(movieRepository, rdb)
 	movieController := controller.NewMovieController(movieService)

@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterOrderRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+func RegisterOrderRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 	orderRepository := repository.NewOrdersRepository()
 	orderService := service.NewOrderService(orderRepository, db)
 	orderController := controller.NewOrderController(orderService)

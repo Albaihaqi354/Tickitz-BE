@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterUserRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+func RegisterUserRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)

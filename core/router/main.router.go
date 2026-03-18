@@ -16,29 +16,33 @@ func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	app.Static("/profile", "./public/profile")
 	app.Static("/movie", "./public/movie")
 
-	app.GET("/health", func(c *gin.Context) {
-		dbErr := db.Ping(context.Background())
-		dbStatus := "OK"
-		if dbErr != nil {
-			dbStatus = "Error: " + dbErr.Error()
-		}
+	// Wrap everything in /api for Vercel compatibility
+	api := app.Group("/api")
+	{
+		api.GET("/health", func(c *gin.Context) {
+			dbErr := db.Ping(context.Background())
+			dbStatus := "OK"
+			if dbErr != nil {
+				dbStatus = "Error: " + dbErr.Error()
+			}
 
-		rdbStatus := "OK"
-		rdbErr := rdb.Ping(context.Background()).Err()
-		if rdbErr != nil {
-			rdbStatus = "Error: " + rdbErr.Error()
-		}
+			rdbStatus := "OK"
+			rdbErr := rdb.Ping(context.Background()).Err()
+			if rdbErr != nil {
+				rdbStatus = "Error: " + rdbErr.Error()
+			}
 
-		c.JSON(http.StatusOK, gin.H{
-			"database": dbStatus,
-			"redis":    rdbStatus,
-			"status":   "Backend is running",
+			c.JSON(http.StatusOK, gin.H{
+				"database": dbStatus,
+				"redis":    rdbStatus,
+				"status":   "Backend is running",
+			})
 		})
-	})
 
-	RegisterAuthRouter(app, db, rdb)
-	RegisterMovieRouter(app, db, rdb)
-	RegisterAdminRouter(app, db, rdb)
-	RegisterUserRouter(app, db, rdb)
-	RegisterOrderRouter(app, db, rdb)
+		RegisterAuthRouter(api, db, rdb)
+		RegisterMovieRouter(api, db, rdb)
+		RegisterAdminRouter(api, db, rdb)
+		RegisterUserRouter(api, db, rdb)
+		RegisterOrderRouter(api, db, rdb)
+	}
 }

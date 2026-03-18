@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterAdminRouter(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
+func RegisterAdminRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 	adminRepository := repository.NewAdminRepository(db)
 	adminService := service.NewAdminService(adminRepository)
 	adminController := controller.NewAdminController(adminService)
