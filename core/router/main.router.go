@@ -16,7 +16,11 @@ func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	app.Static("/profile", "./public/profile")
 	app.Static("/movie", "./public/movie")
 
-	// Wrap everything in /api for Vercel compatibility
+	// Register health at both root and /api for verification
+	app.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "Backend is running (Root)"})
+	})
+
 	api := app.Group("/api")
 	{
 		api.GET("/health", func(c *gin.Context) {
@@ -35,7 +39,7 @@ func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 			c.JSON(http.StatusOK, gin.H{
 				"database": dbStatus,
 				"redis":    rdbStatus,
-				"status":   "Backend is running",
+				"status":   "Backend is running (/api)",
 			})
 		})
 
@@ -45,4 +49,11 @@ func Init(app *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 		RegisterUserRouter(api, db, rdb)
 		RegisterOrderRouter(api, db, rdb)
 	}
+
+	// ALSO register them at root for frontend that hits /movies DIRECTLY
+	RegisterAuthRouter(app, db, rdb)
+	RegisterMovieRouter(app, db, rdb)
+	RegisterAdminRouter(app, db, rdb)
+	RegisterUserRouter(app, db, rdb)
+	RegisterOrderRouter(app, db, rdb)
 }

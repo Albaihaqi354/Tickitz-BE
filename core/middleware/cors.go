@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,14 +21,17 @@ func CORSMiddleware(c *gin.Context) {
 		"http://192.168.50.121:3000",
 	}
 
-	// Ambil FRONTEND_URL dari environment variable (untuk Vercel/Production)
+	// Ambil FRONTEND_URL dari environment variable
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL != "" {
 		whiteListOrigin = append(whiteListOrigin, frontendURL)
 	}
 
 	isAllowed := false
+	// Izinkan semua dari domain vercel.app (Aman untuk Portfolio)
 	if origin == "" {
+		isAllowed = true
+	} else if strings.HasSuffix(origin, ".vercel.app") {
 		isAllowed = true
 	} else {
 		for _, o := range whiteListOrigin {
