@@ -3,18 +3,27 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CORSMiddleware(c *gin.Context) {
 	origin := c.GetHeader("Origin")
+	
+	// Default whitelist untuk development
 	whiteListOrigin := []string{
 		"http://localhost:5000",
 		"http://localhost:5050",
 		"http://localhost:5173",
 		"http://localhost:3000",
 		"http://192.168.50.121:3000",
+	}
+
+	// Ambil FRONTEND_URL dari environment variable (untuk Vercel/Production)
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL != "" {
+		whiteListOrigin = append(whiteListOrigin, frontendURL)
 	}
 
 	isAllowed := false
