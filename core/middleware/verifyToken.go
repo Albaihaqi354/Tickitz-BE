@@ -29,17 +29,20 @@ func VerifyToken(rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		token := result[1]
-
 		rkey := "bian:tickitz:whitelist:" + token
-		exists, err := rdb.Exists(c.Request.Context(), rkey).Result()
-		if err != nil || exists == 0 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.Response{
-				Msg:     "Unauthorized Access",
-				Success: false,
-				Data:    []any{},
-				Error:   "Token not active",
-			})
-			return
+		if rdb != nil {
+			exists, err := rdb.Exists(c.Request.Context(), rkey).Result()
+			if err != nil {
+				log.Println("Warning: Redis whitelist check failed (falling back to JWT validation):", err.Error())
+			} else if exists == 0 {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.Response{
+					Msg:     "Unauthorized Access",
+					Success: false,
+					Data:    []any{},
+					Error:   "Token not active",
+				})
+				return
+			}
 		}
 
 		var jc pkg.JWTClaims

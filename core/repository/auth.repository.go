@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
@@ -45,20 +46,39 @@ func (a AuthRepository) FindUserByEmail(ctx context.Context, email string) (mode
 }
 
 func (a AuthRepository) SaveToken(ctx context.Context, token string, ttl time.Duration) error {
+	if a.redis == nil {
+		log.Println("Warning: Redis client is nil, skipping token save")
+		return nil
+	}
 	rkey := "bian:tickitz:whitelist:" + token
-	return a.redis.Set(ctx, rkey, "active", ttl).Err()
+	err := a.redis.Set(ctx, rkey, "active", ttl).Err()
+	if err != nil {
+		log.Println("Warning: failed to save token to Redis (ignoring):", err.Error())
+	}
+	return nil
 }
 
 func (a AuthRepository) DeleteToken(ctx context.Context, token string) error {
+	if a.redis == nil {
+		log.Println("Warning: Redis client is nil, skipping token delete")
+		return nil
+	}
 	rkey := "bian:tickitz:whitelist:" + token
-	return a.redis.Del(ctx, rkey).Err()
+	err := a.redis.Del(ctx, rkey).Err()
+	if err != nil {
+		log.Println("Warning: failed to delete token from Redis (ignoring):", err.Error())
+	}
+	return nil
 }
 
 func (a AuthRepository) TokenWhitelist(ctx context.Context, token string) (bool, error) {
+	if a.redis == nil {
+		return true, nil
+	}
 	rkey := "bian:tickitz:whitelist:" + token
 	rsc, err := a.redis.Exists(ctx, rkey).Result()
 	if err != nil {
-		return false, err
+		return true, nil
 	}
 	return rsc > 0, nil
 }
