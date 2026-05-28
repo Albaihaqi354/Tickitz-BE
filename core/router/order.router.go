@@ -20,7 +20,7 @@ func RegisterOrderRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 		g.GET("/schedules/:id", orderController.GetSchedules)
 		g.GET("/seats/:id", orderController.GetSeats)
 
-		g.POST("/", middleware.VerifyToken(rdb), middleware.CheckRole("user"), orderController.CreateOrder)
+		g.POST("", middleware.VerifyToken(rdb), middleware.CheckRole("user"), orderController.CreateOrder)
 		g.PATCH("/:id", middleware.VerifyToken(rdb), middleware.CheckRole("user"), orderController.UpdatePaymentStatus)
 	}
 }
