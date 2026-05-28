@@ -46,7 +46,7 @@ func VerifyToken(rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		var jc pkg.JWTClaims
-		_, err = jc.VerifyToken(token)
+		_, err := jc.VerifyToken(token)
 		if err != nil {
 			log.Println(err.Error())
 			if errors.Is(err, jwt.ErrTokenExpired) {
