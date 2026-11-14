@@ -12,12 +12,13 @@ import (
 func CORSMiddleware(c *gin.Context) {
 	origin := c.GetHeader("Origin")
 
-	// Default whitelist untuk development
+	// Default whitelist untuk development + domain Vercel production
 	whiteListOrigin := []string{
 		"http://localhost:5000",
 		"http://localhost:5050",
 		"http://localhost:5173",
 		"http://localhost:3000",
+		"https://tickitz-liard.vercel.app",
 	}
 
 	// FRONTEND_URL — tambahkan satu URL tambahan
