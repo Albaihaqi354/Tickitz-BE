@@ -33,10 +33,10 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 func (a AuthController) Register(c *gin.Context) {
 	var newUser dto.NewUser
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Response{
-			Msg:     "Internal Server Error",
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Bad Request",
 			Success: false,
-			Error:   "internal server error",
+			Error:   err.Error(),
 			Data:    []any{},
 		})
 		return

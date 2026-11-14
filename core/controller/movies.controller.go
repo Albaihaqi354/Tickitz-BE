@@ -167,6 +167,16 @@ func (ctr MovieController) GetMovieDetail(c *gin.Context) {
 	idParam := c.Param("id")
 
 	movieId, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.Response{
+			Msg:     "Invalid movie id",
+			Success: false,
+			Error:   "id must be a number",
+			Data:    []any{},
+		})
+		return
+	}
+
 	data, err := ctr.movieService.GetMovieDetail(c.Request.Context(), movieId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Response{

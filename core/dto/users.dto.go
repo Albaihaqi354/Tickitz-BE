@@ -20,8 +20,8 @@ type User struct {
 }
 
 type NewUser struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
 type LoginRequest struct {
@@ -72,7 +72,7 @@ type GetHistory struct {
 
 type UpdatePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
-	NewPassword string `json:"new_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=8"`
 }
 
 type UpdateProfileRequest struct {

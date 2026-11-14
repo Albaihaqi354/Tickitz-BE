@@ -45,3 +45,45 @@ func CheckRole(role string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// CheckRoles mengizinkan akses jika role user ada di salah satu role yang diizinkan.
+// Contoh: CheckRoles("admin", "user")
+func CheckRoles(roles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, isExist := c.Get("token")
+		if !isExist {
+			c.AbortWithStatusJSON(http.StatusForbidden, dto.Response{
+				Msg:     "Forbidden Access",
+				Success: false,
+				Data:    []any{},
+				Error:   "Access Denied",
+			})
+			return
+		}
+
+		accessToken, ok := token.(pkg.JWTClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, dto.Response{
+				Msg:     "Internal Server Error",
+				Success: false,
+				Data:    []any{},
+				Error:   "internal server error",
+			})
+			return
+		}
+
+		for _, role := range roles {
+			if accessToken.Role == role {
+				c.Next()
+				return
+			}
+		}
+
+		c.AbortWithStatusJSON(http.StatusForbidden, dto.Response{
+			Msg:     "Forbidden Access",
+			Success: false,
+			Data:    []any{},
+			Error:   "Access Denied",
+		})
+	}
+}

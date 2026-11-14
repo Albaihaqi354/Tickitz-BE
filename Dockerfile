@@ -20,6 +20,6 @@ COPY public ./public
 
 RUN chmod +x server
 
-EXPOSE 8080
+EXPOSE 5000
 
 CMD [ "./server" ]

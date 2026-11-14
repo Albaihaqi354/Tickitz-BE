@@ -22,11 +22,13 @@ var (
 
 func initApp() {
 	once.Do(func() {
-		// Initialize DB
+		// Initialize DB (supports DATABASE_URL dari Neon)
+		// pgxpool tidak langsung connect — koneksi dibuat saat query pertama.
+		// Jadi InitDb() bisa succeed walaupun DB sementara down.
 		var err error
 		db, err = config.InitDb()
 		if err != nil {
-			log.Println("Vercel: Failed to Connect Database:", err)
+			log.Println("Vercel: Failed to init DB pool:", err)
 		}
 
 		// Initialize Redis
@@ -36,11 +38,11 @@ func initApp() {
 		gin.SetMode(gin.ReleaseMode)
 		app = gin.New()
 		app.Use(gin.Recovery())
-		
-		// Add CORS middleware
 		app.Use(middleware.CORSMiddleware)
+		app.MaxMultipartMemory = 8 << 20 // 8 MB limit untuk file upload
 
-		// Initialize Routes
+		// Register routes — selalu daftarkan agar app tidak panic.
+		// Kalau db nil, query akan return error dan controller kirim 500.
 		router.Init(app, db, rdb)
 	})
 }

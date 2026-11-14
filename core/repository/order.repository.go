@@ -23,6 +23,8 @@ type OrderRepo interface {
 	GetSeatsByScheduleID(ctx context.Context, db DBTX, scheduleId int) ([]model.Seat, error)
 	GetPriceFromSchedule(ctx context.Context, db DBTX, scheduleId int) (int, error)
 	UpdatePaymentStatus(ctx context.Context, db DBTX, orderId int, status string) error
+	GetOrderOwner(ctx context.Context, db DBTX, orderId int) (int, error)
+	GetBookedSeatIds(ctx context.Context, db DBTX, scheduleId int) ([]int, error)
 }
 
 type OrderRepository struct{}
@@ -84,15 +86,15 @@ func (o OrderRepository) GetSchedules(ctx context.Context, db DBTX, movieId int,
 
 func (o OrderRepository) InsertOrder(ctx context.Context, db DBTX, order model.Order) (int, string, time.Time, error) {
 	sqlOrder := `
-		INSERT INTO orders (user_id, schedule_id, total_price, payment_status, booking_code)
-		VALUES ($1, $2, $3, $4, md5(random()::text))
+		INSERT INTO orders (user_id, schedule_id, total_price, payment_status, payment_method, booking_code)
+		VALUES ($1, $2, $3, $4, $5, md5(random()::text))
 		RETURNING id, booking_code, created_at`
 
 	var id int
 	var bookingCode string
 	var createdAt time.Time
 
-	err := db.QueryRow(ctx, sqlOrder, order.UserId, order.ScheduleId, order.TotalPrice, order.PaymentStatus).Scan(&id, &bookingCode, &createdAt)
+	err := db.QueryRow(ctx, sqlOrder, order.UserId, order.ScheduleId, order.TotalPrice, order.PaymentStatus, order.PaymentMethod).Scan(&id, &bookingCode, &createdAt)
 	if err != nil {
 		log.Println("InsertOrder Error:", err.Error())
 		return 0, "", time.Time{}, err
@@ -124,7 +126,7 @@ func (o OrderRepository) GetSeatsByScheduleID(ctx context.Context, db DBTX, sche
 					FROM orders o 
 					JOIN order_details od ON od.order_id = o.id 
 					WHERE o.schedule_id = sch.id 
-						AND o.payment_status = 'paid' 
+						AND o.payment_status IN ('paid', 'completed', 'pending') 
 						AND od.seat_id = se.id
 				) THEN 'sold'
 				ELSE 'available'
@@ -169,4 +171,42 @@ func (o OrderRepository) UpdatePaymentStatus(ctx context.Context, db DBTX, order
 		return err
 	}
 	return nil
+}
+
+// GetOrderOwner mengembalikan user_id pemilik order. Dipakai untuk ownership check.
+func (o OrderRepository) GetOrderOwner(ctx context.Context, db DBTX, orderId int) (int, error) {
+	sqlStr := "SELECT user_id FROM orders WHERE id = $1"
+	var userId int
+	err := db.QueryRow(ctx, sqlStr, orderId).Scan(&userId)
+	if err != nil {
+		return 0, err
+	}
+	return userId, nil
+}
+
+// GetBookedSeatIds mengembalikan seat_id yang sudah dipesan untuk schedule tertentu.
+// Kursi dengan status paid, completed, atau pending dianggap sudah dipesan.
+func (o OrderRepository) GetBookedSeatIds(ctx context.Context, db DBTX, scheduleId int) ([]int, error) {
+	sqlStr := `
+		SELECT od.seat_id
+		FROM orders o
+		JOIN order_details od ON od.order_id = o.id
+		WHERE o.schedule_id = $1
+			AND o.payment_status IN ('paid', 'completed', 'pending')`
+
+	rows, err := db.Query(ctx, sqlStr, scheduleId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var seatIds []int
+	for rows.Next() {
+		var seatId int
+		if err := rows.Scan(&seatId); err != nil {
+			return nil, err
+		}
+		seatIds = append(seatIds, seatId)
+	}
+	return seatIds, nil
 }

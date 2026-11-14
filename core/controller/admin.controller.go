@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -149,9 +147,7 @@ func (ctrl AdminController) UpdateMovieAdmin(c *gin.Context) {
 	}
 
 	if req.Poster != nil {
-		ext := path.Ext(req.Poster.Filename)
-		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
-		if !re.MatchString(ext) {
+		if !validateImageFile(req.Poster) {
 			c.JSON(http.StatusBadRequest, dto.Response{
 				Msg:     "Invalid image extension",
 				Error:   "Bad Request",
@@ -177,9 +173,7 @@ func (ctrl AdminController) UpdateMovieAdmin(c *gin.Context) {
 	}
 
 	if req.Backdrop != nil {
-		ext := path.Ext(req.Backdrop.Filename)
-		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
-		if !re.MatchString(ext) {
+		if !validateImageFile(req.Backdrop) {
 			c.JSON(http.StatusBadRequest, dto.Response{
 				Msg:     "Invalid image extension",
 				Error:   "Bad Request",
@@ -273,9 +267,7 @@ func (ctrl AdminController) CreateMovieAdmin(c *gin.Context) {
 	}
 
 	if req.Poster != nil {
-		ext := path.Ext(req.Poster.Filename)
-		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
-		if !re.MatchString(ext) {
+		if !validateImageFile(req.Poster) {
 			c.JSON(http.StatusBadRequest, dto.Response{
 				Msg:     err.ErrInvalidExt.Error(),
 				Error:   "Bad Request",
@@ -301,9 +293,7 @@ func (ctrl AdminController) CreateMovieAdmin(c *gin.Context) {
 	}
 
 	if req.Backdrop != nil {
-		ext := path.Ext(req.Backdrop.Filename)
-		re := regexp.MustCompile("^[.](jpg|png|jpeg)$")
-		if !re.MatchString(ext) {
+		if !validateImageFile(req.Backdrop) {
 			c.JSON(http.StatusBadRequest, dto.Response{
 				Msg:     err.ErrInvalidExt.Error(),
 				Error:   "Bad Request",

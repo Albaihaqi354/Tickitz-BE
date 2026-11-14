@@ -6,6 +6,7 @@ import (
 
 	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/core/service"
+	"github.com/Albaihaqi354/Tickitz-BE/pkg"
 	"github.com/gin-gonic/gin"
 )
 
@@ -204,7 +205,7 @@ func (ctrl OrderController) CreateOrder(c *gin.Context) {
 
 // UpdatePaymentStatus godoc
 // @Summary      Update order payment status
-// @Description  Update the payment status of an order (Requires admin token)
+// @Description  Update the payment status of an order. Admin can update any order. User can only update their own.
 // @Tags         orders
 // @Accept       json
 // @Produce      json
@@ -213,6 +214,7 @@ func (ctrl OrderController) CreateOrder(c *gin.Context) {
 // @Param        status  body      dto.UpdateOrderRequest  true  "Status Body"
 // @Success      200     {object}  dto.Response
 // @Failure      401     {object}  dto.Response
+// @Failure      403     {object}  dto.Response
 // @Failure      400     {object}  dto.Response
 // @Failure      500     {object}  dto.Response
 // @Router       /orders/{id} [patch]
@@ -238,6 +240,33 @@ func (ctrl OrderController) UpdatePaymentStatus(c *gin.Context) {
 			Data:    nil,
 		})
 		return
+	}
+
+	// Ownership check: user hanya bisa update order miliknya sendiri
+	token, _ := c.Get("token")
+	userId, _ := c.Get("user_id")
+
+	if jwtToken, ok := token.(pkg.JWTClaims); ok && jwtToken.Role == "user" {
+		uid, _ := userId.(int)
+		ownerId, err := ctrl.orderService.GetOrderOwner(c.Request.Context(), orderId)
+		if err != nil {
+			c.JSON(http.StatusNotFound, dto.Response{
+				Msg:     "Order not found",
+				Success: false,
+				Error:   "order not found",
+				Data:    nil,
+			})
+			return
+		}
+		if ownerId != uid {
+			c.JSON(http.StatusForbidden, dto.Response{
+				Msg:     "Forbidden Access",
+				Success: false,
+				Error:   "You can only update your own order",
+				Data:    nil,
+			})
+			return
+		}
 	}
 
 	err = ctrl.orderService.UpdatePaymentStatus(c.Request.Context(), orderId, req.PaymentStatus)

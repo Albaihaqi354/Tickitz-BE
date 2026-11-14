@@ -12,7 +12,7 @@ import (
 
 func RegisterAdminRouter(app gin.IRouter, db *pgxpool.Pool, rdb *redis.Client) {
 	adminRepository := repository.NewAdminRepository(db)
-	adminService := service.NewAdminService(adminRepository)
+	adminService := service.NewAdminService(adminRepository, rdb)
 	adminController := controller.NewAdminController(adminService)
 
 	g := app.Group("/admin")

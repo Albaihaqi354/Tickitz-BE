@@ -6,15 +6,34 @@ import (
 
 	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
 	"github.com/Albaihaqi354/Tickitz-BE/core/repository"
+	"github.com/redis/go-redis/v9"
 )
 
 type AdminService struct {
 	adminRepository *repository.AdminRepository
+	redis           *redis.Client
 }
 
-func NewAdminService(adminRepository *repository.AdminRepository) *AdminService {
+func NewAdminService(adminRepository *repository.AdminRepository, rdb *redis.Client) *AdminService {
 	return &AdminService{
 		adminRepository: adminRepository,
+		redis:           rdb,
+	}
+}
+
+// invalidateMovieCache menghapus cache movie di Redis setelah operasi CRUD admin.
+func (a AdminService) invalidateMovieCache(ctx context.Context) {
+	if a.redis == nil {
+		return
+	}
+	keys := []string{
+		"bian:tickitz:upcommingMovie",
+		"bian:tickitz:popularMovie",
+	}
+	for _, key := range keys {
+		if err := a.redis.Del(ctx, key).Err(); err != nil {
+			log.Println("Warning: failed to invalidate cache key:", key, err.Error())
+		}
 	}
 }
 
@@ -53,6 +72,7 @@ func (a AdminService) DeleteMovieAdmin(ctx context.Context, movieId int) error {
 		log.Println("Service Error:", err.Error())
 		return err
 	}
+	a.invalidateMovieCache(ctx)
 	return nil
 }
 
@@ -62,6 +82,8 @@ func (a AdminService) UpdateMovieAdmin(ctx context.Context, id int, req dto.Upda
 		log.Println("Service Error:", err.Error())
 		return dto.UpdateMovieResponse{}, err
 	}
+
+	a.invalidateMovieCache(ctx)
 
 	response := dto.UpdateMovieResponse{
 		Id:              updatedMovie.Id,
@@ -84,6 +106,8 @@ func (a AdminService) CreateMovieAdmin(ctx context.Context, req dto.CreateMovieR
 		log.Println("Service Error:", err.Error())
 		return dto.CreateMovieResponse{}, err
 	}
+
+	a.invalidateMovieCache(ctx)
 
 	response := dto.CreateMovieResponse{
 		Id:              newMovie.Id,

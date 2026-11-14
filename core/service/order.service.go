@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -75,6 +76,29 @@ func (o OrderService) CreateOrder(ctx context.Context, userId int, req dto.Creat
 		return 0, "", time.Time{}, err
 	}
 
+	// Cek apakah kursi yang diminta sudah dipesan untuk schedule ini
+	bookedSeats, err := o.orderRepository.GetBookedSeatIds(ctx, o.db, req.ScheduleId)
+	if err != nil {
+		log.Println("Service Error (GetBookedSeatIds):", err.Error())
+		return 0, "", time.Time{}, err
+	}
+
+	bookedSet := make(map[int]bool, len(bookedSeats))
+	for _, s := range bookedSeats {
+		bookedSet[s] = true
+	}
+
+	var alreadyBooked []int
+	for _, seatId := range req.Seats {
+		if bookedSet[seatId] {
+			alreadyBooked = append(alreadyBooked, seatId)
+		}
+	}
+
+	if len(alreadyBooked) > 0 {
+		return 0, "", time.Time{}, fmt.Errorf("seats already booked: %v", alreadyBooked)
+	}
+
 	totalPrice := price * len(req.Seats)
 
 	order := model.Order{
@@ -82,6 +106,7 @@ func (o OrderService) CreateOrder(ctx context.Context, userId int, req dto.Creat
 		ScheduleId:    req.ScheduleId,
 		TotalPrice:    totalPrice,
 		PaymentStatus: "pending",
+		PaymentMethod: req.PaymentMethod,
 	}
 
 	tx, err := o.db.Begin(ctx)
@@ -120,4 +145,9 @@ func (o OrderService) UpdatePaymentStatus(ctx context.Context, orderId int, stat
 		return err
 	}
 	return nil
+}
+
+// GetOrderOwner mengembalikan user_id pemilik order untuk ownership check.
+func (o OrderService) GetOrderOwner(ctx context.Context, orderId int) (int, error) {
+	return o.orderRepository.GetOrderOwner(ctx, o.db, orderId)
 }

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"path/filepath"
-	"regexp"
 	"time"
 
 	"github.com/Albaihaqi354/Tickitz-BE/core/dto"
@@ -255,9 +253,7 @@ func (u UserController) UpdateProfile(c *gin.Context) {
 	}
 
 	if req.Image != nil {
-		ext := path.Ext(req.Image.Filename)
-		re := regexp.MustCompile("^[.](jpg|png)$")
-		if !re.Match([]byte(ext)) {
+		if !validateImageFile(req.Image) {
 			c.JSON(http.StatusBadRequest, dto.Response{
 				Msg:     err.ErrInvalidExt.Error(),
 				Error:   "Bad Request",
@@ -267,6 +263,7 @@ func (u UserController) UpdateProfile(c *gin.Context) {
 			return
 		}
 
+		ext := filepath.Ext(req.Image.Filename)
 		filename := fmt.Sprintf("%d_profile_%d%s", time.Now().UnixNano(), userIdInt, ext)
 		if e := c.SaveUploadedFile(req.Image, filepath.Join("public", "profile", filename)); e != nil {
 			log.Println(e.Error())
